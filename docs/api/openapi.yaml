@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: VitalBand API
+  version: 0.1.0
+servers:
+  - url: http://localhost:5000/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /auth/login:
+    post:
+      summary: Login y emisión de JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Token
+  /patients:
+    get:
+      summary: Listar pacientes
+      responses:
+        '200':
+          description: OK

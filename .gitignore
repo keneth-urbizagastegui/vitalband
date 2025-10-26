@@ -1,0 +1,39 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.venv/
+.env
+.env.*
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+frontend/.env*
+frontend/.vite/
+
+# Flask / Alembic
+backend/instance/
+backend/migrations/versions/__pycache__/
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# OS / Misc
+*.swp
+*.swo
