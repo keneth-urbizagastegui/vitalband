@@ -1,7 +1,8 @@
-import { useState } from "react";
+// frontend/src/pages/Login.tsx
+import React, { useState } from "react"; // Asegúrate de importar React si usas FormEvent
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logo from "../assets/logo.png"; // logo blanco
+import logo from "../assets/logo.png";
 
 type LocState = { from?: { pathname?: string } } | null;
 
@@ -9,7 +10,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
-  const [remember, setRemember] = useState(true);
+  // const [remember, setRemember] = useState(true); // Comentado si no se usa
   const [error, setError] = useState<string | null>(null);
 
   const { login, loading } = useAuth();
@@ -18,9 +19,17 @@ export default function Login() {
   const locState = (location.state as LocState) || null;
 
   const validate = () => {
-    if (!email || !password) { setError("Completa email y contraseña."); return false; }
+    if (!email || !password) {
+      setError("Completa email y contraseña.");
+      return false;
+    }
     const re = /\S+@\S+\.\S+/;
-    if (!re.test(email)) { setError("Email inválido."); return false; }
+    if (!re.test(email)) {
+      setError("Email inválido.");
+      return false;
+    }
+    // Podrías añadir validación de longitud de contraseña aquí si quieres
+    // if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return false; }
     return true;
   };
 
@@ -30,12 +39,17 @@ export default function Login() {
     if (!validate()) return;
 
     try {
-      await login(email, password);
+      // Llama a login y obtén el usuario directamente
+      const loggedInUser = await login(email, password);
+
       const from = locState?.from?.pathname;
-      if (from) return navigate(from, { replace: true });
-      const raw = localStorage.getItem("user");
-      const role = raw ? (JSON.parse(raw).role as "admin" | "user") : "user";
-      navigate(role === "admin" ? "/admin" : "/dashboard", { replace: true });
+      // Si venía de otra ruta protegida, redirige allí
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        // Si no, redirige según el rol del usuario obtenido
+        navigate(loggedInUser.role === "admin" ? "/admin" : "/dashboard", { replace: true });
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "No se pudo iniciar sesión.";
       setError(msg);
@@ -43,7 +57,25 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex">
+    // ... (El resto de tu JSX se mantiene igual) ...
+    // Solo asegúrate de que los enlaces "/forgot" y "/signup" funcionen o llévalos a páginas placeholder
+    // Ejemplo para el checkbox "Recordarme" (si decides implementarlo o quitarlo):
+    /*
+            <div className="mt-4 flex items-center justify-between">
+              <label className="inline-flex items-center gap-2 text-sm text-primary-700">
+                <input
+                  type="checkbox"
+                  // checked={remember} // Quita esto si no lo usas
+                  // onChange={(e) => setRemember(e.target.checked)} // Quita esto si no lo usas
+                  className="rounded border-primary-500/40 text-primary-600 focus:ring-primary-500/50"
+                />
+                Recordarme // Podrías quitar esta sección si no implementarás la funcionalidad
+              </label>
+              // ... (resto de enlaces) ...
+            </div>
+    */
+    // ... (El resto de tu JSX) ...
+     <div className="relative min-h-screen flex">
       {/* Capa 1: imagen de fondo (desde public/) */}
       <img
         src="/bg-hero.png"
@@ -73,8 +105,9 @@ export default function Login() {
 
           <form onSubmit={handleSubmit}>
             {/* Email */}
-            <label className="block text-sm font-medium text-primary-700">Email</label>
+            <label htmlFor="emailInput" className="block text-sm font-medium text-primary-700">Email</label> {/* Añadido htmlFor */}
             <input
+              id="emailInput" // Añadido id
               type="email"
               className="mt-1 w-full rounded-xl border border-primary-500/30 bg-white px-4 py-3
                          placeholder-primary-500/60 text-ink focus:outline-none
@@ -86,9 +119,10 @@ export default function Login() {
             />
 
             {/* Password */}
-            <label className="block text-sm font-medium text-primary-700 mt-4">Contraseña</label>
+            <label htmlFor="passwordInput" className="block text-sm font-medium text-primary-700 mt-4">Contraseña</label> {/* Añadido htmlFor */}
             <div className="mt-1 relative">
               <input
+                id="passwordInput" // Añadido id
                 type={show ? "text" : "password"}
                 className="w-full rounded-xl border border-primary-500/30 bg-white px-4 py-3 pr-20
                            placeholder-primary-500/60 text-ink focus:outline-none
@@ -110,15 +144,16 @@ export default function Login() {
 
             {/* Recordarme + enlaces */}
             <div className="mt-4 flex items-center justify-between">
-              <label className="inline-flex items-center gap-2 text-sm text-primary-700">
+              {/* <label className="inline-flex items-center gap-2 text-sm text-primary-700">
                 <input
                   type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
+                  // checked={remember} // Descomenta si lo usas
+                  // onChange={(e) => setRemember(e.target.checked)} // Descomenta si lo usas
                   className="rounded border-primary-500/40 text-primary-600 focus:ring-primary-500/50"
                 />
                 Recordarme
-              </label>
+              </label> */}
+               <div></div> {/* Placeholder para mantener el justify-between si quitas "Recordarme" */}
               <div className="text-sm">
                 <a href="/forgot" className="underline text-primary-700 hover:text-primary-900">¿Olvidaste tu contraseña?</a>
                 <span className="mx-2 text-primary-500/60">·</span>

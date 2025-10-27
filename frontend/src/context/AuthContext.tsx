@@ -5,7 +5,7 @@ import { login as apiLogin, logout as apiLogout, getStoredUser } from "../api/en
 type AuthState = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
 };
 
@@ -15,19 +15,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // hidrata estado desde localStorage al cargar
   useEffect(() => {
     setUser(getStoredUser());
     setLoading(false);
   }, []);
 
-  const doLogin = async (email: string, password: string) => {
+  // Modifica doLogin para que devuelva el usuario
+  const doLogin = async (email: string, password: string): Promise<User> => {
     setLoading(true);
     try {
-      const { user } = await apiLogin(email, password);
-      setUser(user);
-    } finally {
-      setLoading(false);
+      // apiLogin ya devuelve { token, user }
+      const { user: loggedInUser } = await apiLogin(email, password);
+      setUser(loggedInUser);
+      setLoading(false); // Mover setLoading(false) aquí
+      return loggedInUser; // Devuelve el usuario
+    } catch (error) {
+      setLoading(false); // Asegúrate de parar la carga en caso de error
+      throw error; // Relanza el error para que Login.tsx lo maneje
     }
   };
 

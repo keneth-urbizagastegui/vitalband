@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel"; // crea este archivo si aún no
+import AdminPanel from "./pages/AdminPanel"; 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleGuard from "./routes/RoleGuard";
 
@@ -25,8 +25,8 @@ export default function App() {
       </Route>
 
       {/* placeholders opcionales */}
-      <Route path="/forgot" element={<div className="p-6">Recuperar contraseña</div>} />
-      <Route path="/signup" element={<div className="p-6">Registro</div>} />
+      <Route path="/forgot" element={<div className="p-6">Página para Recuperar Contraseña (Pendiente)</div>} />
+      <Route path="/signup" element={<div className="p-6">Página de Registro (Pendiente)</div>} />
       <Route path="*" element={<div className="p-6">No encontrado</div>} />
     </Routes>
   );
