@@ -1,6 +1,7 @@
-from app import create_app
+from app import create_app, Config
 
-app = create_app()
+app = create_app(Config)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Permite `python run.py`
+    app.run(host="127.0.0.1", port=5000)
