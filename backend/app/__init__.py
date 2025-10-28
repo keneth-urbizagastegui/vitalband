@@ -6,6 +6,7 @@ from .controller.auth_controller import auth_bp
 from .controller.client_controller import client_bp
 from .controller.admin_controller import admin_bp
 from .controller.telemetry_controller import telemetry_bp  # nuevo
+from .controller.chatbot_controller import chatbot_bp
 
 def create_app(config_object: type[Config] | str = Config):
     app = Flask(__name__)
@@ -43,6 +44,7 @@ def create_app(config_object: type[Config] | str = Config):
     app.register_blueprint(client_bp, url_prefix="/api/v1")
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
     app.register_blueprint(telemetry_bp, url_prefix="/api/v1")
+    app.register_blueprint(chatbot_bp, url_prefix="/api/v1/chatbot")
 
     @app.get("/health")
     def health():
