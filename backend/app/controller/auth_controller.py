@@ -1,36 +1,35 @@
 # backend/app/controller/auth_controller.py
 
-import logging # Para logging en lugar de print
-from flask import Blueprint, request, abort, jsonify
-# Importa funciones para hashear y verificar contraseñas
+import logging 
+from flask import Blueprint, request, abort, jsonify, current_app # <-- Import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from marshmallow import ValidationError
 
-# Schemas de Request (necesitarás crearlos o completarlos)
+# ... (El resto de tus imports: request_schemas, response_schemas, User, db) ...
 from ..model.dto.request_schemas import (
     LoginRequest,
-    RegisterRequest, # ¡Nuevo! Necesitas crearlo
-    ForgotPasswordRequest, # ¡Nuevo! Necesitas crearlo
-    ResetPasswordRequest # ¡Nuevo! Necesitas crearlo
+    RegisterRequest, 
+    ForgotPasswordRequest, 
+    ResetPasswordRequest
 )
-# Schema de Respuesta (si lo necesitas para el registro)
-from ..model.dto.response_schemas import UserResponse # ¡Nuevo! Necesitas crearlo
-
+from ..model.dto.response_schemas import UserResponse 
 from ..model.models import User
-from ..extensions import db # Importa db para operaciones de registro
+from ..extensions import db 
 
-auth_bp = Blueprint("auth", __name__) # Mantenemos prefijo en __init__.py
+auth_bp = Blueprint("auth", __name__) 
 
 # Instancias de Schemas
 _login_in = LoginRequest()
-_register_in = RegisterRequest() # Nuevo
-_forgot_password_in = ForgotPasswordRequest() # Nuevo
-_reset_password_in = ResetPasswordRequest() # Nuevo
-_user_out = UserResponse() # Nuevo
+_register_in = RegisterRequest() 
+_forgot_password_in = ForgotPasswordRequest() 
+_reset_password_in = ResetPasswordRequest() 
+_user_out = UserResponse() 
 
 # Configura un logger
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO) # <-- Nos aseguramos de que el nivel de log esté bien
+
 
 @auth_bp.post("/login")
 def login():
@@ -41,36 +40,36 @@ def login():
         data = _login_in.load(payload)
     except ValidationError as err:
         logger.warning(f"Intento de login fallido (validación): {err.messages}")
-        # Devuelve un error más genérico por seguridad
         return {"message": "Credenciales inválidas"}, 401
 
     email = (data.get("email") or "").strip().lower()
     password = (data.get("password") or "").strip()
 
-    # --- Implementación REAL (Habilitada) ---
     user = User.query.filter_by(email=email).first()
 
-    # Verifica si el usuario existe Y si la contraseña coincide con el hash
     if user and check_password_hash(user.pass_hash, password):
         user_id = user.id
         role = user.role
         additional = {"role": role}
-        # Pasa el ID del usuario como identity
         token = create_access_token(identity=user_id, additional_claims=additional)
         logger.info(f"Login exitoso para usuario {user_id} ({email})")
-        # Considera devolver también información básica del usuario si el frontend la necesita inmediatamente
+        
         user_info = {
             "id": user.id,
             "email": user.email,
             "role": user.role
-            # Añade 'name' si lo tienes en el modelo User y lo quieres devolver
-            # "name": user.name
         }
+        
+        # Log que podemos quitar después
+        logger.error(f"PASO 1 (BACKEND): Token creado y enviado: {token}")
+        
         return {"access_token": token, "user": user_info}, 200
     else:
         logger.warning(f"Intento de login fallido (credenciales) para email: {email}")
         return {"message": "Credenciales inválidas"}, 401
-    # --- ---
+
+
+# ... (Tus otras rutas: /register, /forgot-password, /reset-password, /me se mantienen igual) ...
 
 @auth_bp.post("/register")
 def register():
@@ -78,46 +77,40 @@ def register():
     payload = request.get_json(silent=True) or {}
 
     try:
-        # Valida name, email, password (y quizás confirmación de password)
         data = _register_in.load(payload)
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
     email = data["email"].strip().lower()
-    password = data["password"] # Asume que el schema ya valida longitud/complejidad
-    name = data.get("name", "") # Asume que 'name' viene en RegisterRequest
+    password = data["password"] 
+    name = data.get("name", "") 
 
-    # 1. Verificar si el email ya existe
     if User.query.filter_by(email=email).first():
         logger.warning(f"Intento de registro fallido (email ya existe): {email}")
-        abort(409, description="El correo electrónico ya está registrado.") # 409 Conflict
+        abort(409, description="El correo electrónico ya está registrado.") 
 
-    # 2. Hashear la contraseña
     password_hash = generate_password_hash(password)
 
-    # 3. Crear el nuevo usuario (rol 'client' por defecto)
     new_user = User(
         name=name,
         email=email,
         pass_hash=password_hash,
-        role='client' # Por defecto para el registro público
+        role='client' 
     )
 
     try:
         db.session.add(new_user)
         db.session.commit()
-        db.session.refresh(new_user) # Para obtener el ID asignado
+        db.session.refresh(new_user) 
         logger.info(f"Nuevo usuario registrado: {new_user.id} ({email})")
 
-        # Opcional: Crear token JWT inmediatamente para loguear al usuario
         additional = {"role": new_user.role}
         token = create_access_token(identity=new_user.id, additional_claims=additional)
 
-        # Devuelve info del usuario creado y el token
         return {
             "message": "Usuario registrado exitosamente.",
             "user": _user_out.dump(new_user),
-            "access_token": token # Opcional, si quieres auto-login
+            "access_token": token 
             }, 201
 
     except Exception as e:
@@ -131,7 +124,7 @@ def forgot_password():
     """Inicia el proceso de recuperación de contraseña (envía email)."""
     payload = request.get_json(silent=True) or {}
     try:
-        data = _forgot_password_in.load(payload) # Valida { "email": "..." }
+        data = _forgot_password_in.load(payload) 
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
@@ -139,23 +132,10 @@ def forgot_password():
     user = User.query.filter_by(email=email).first()
 
     if user:
-        # --- Lógica Pendiente ---
-        # 1. Generar un token de reseteo seguro y con expiración
-        #    (podrías usar Flask-JWT-Extended para esto también,
-        #     o un token específico con itsdangerous).
-        # reset_token = create_reset_token(identity=user.id) # Función hipotética
-        # 2. Construir la URL de reseteo (ej. https://frontend.com/reset-password?token=...)
-        # reset_url = f"https://tu-frontend.com/reset-password?token={reset_token}"
-        # 3. Enviar un email al usuario con esa URL.
-        #    Necesitarás configurar un servicio de envío de emails (ej. Flask-Mail, SendGrid).
-        # send_password_reset_email(user.email, reset_url) # Función hipotética
-        # --- Fin Lógica Pendiente ---
         logger.info(f"Solicitud de reseteo de contraseña para {email}. TODO: Enviar email.")
-        # Devuelve siempre éxito para no revelar si un email existe o no
         return {"message": "Si tu correo está registrado, recibirás instrucciones para restablecer tu contraseña."}, 200
     else:
         logger.warning(f"Intento de reseteo de contraseña para email no registrado: {email}")
-        # Devuelve el mismo mensaje genérico
         return {"message": "Si tu correo está registrado, recibirás instrucciones para restablecer tu contraseña."}, 200
 
 
@@ -164,52 +144,17 @@ def reset_password():
     """Completa el proceso de recuperación de contraseña."""
     payload = request.get_json(silent=True) or {}
     try:
-        # Valida { "token": "...", "new_password": "..." }
         data = _reset_password_in.load(payload)
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
     reset_token = data["token"]
     new_password = data["new_password"]
-
-    # --- Lógica Pendiente ---
-    # 1. Validar el token de reseteo (verificar firma, expiración).
-    #    Si usaste JWT, podrías usar `decode_token`. Si usaste itsdangerous, `serializer.loads`.
-    # try:
-    #     user_id = verify_reset_token(reset_token) # Función hipotética, devuelve user_id o lanza excepción
-    # except Exception as token_error: # Captura TokenExpired, BadSignature, etc.
-    #     logger.warning(f"Intento de reseteo con token inválido/expirado: {token_error}")
-    #     abort(400, description="El enlace de restablecimiento es inválido o ha expirado.")
-    #
-    # 2. Buscar al usuario por user_id.
-    # user = User.query.get(user_id)
-    # if not user:
-    #     # Raro, el token era válido pero el usuario ya no existe
-    #     logger.error(f"Usuario {user_id} de token de reseteo válido no encontrado en BD.")
-    #     abort(404, description="Usuario no encontrado.")
-    #
-    # 3. Hashear la nueva contraseña.
-    # new_password_hash = generate_password_hash(new_password)
-    #
-    # 4. Actualizar el hash en la base de datos.
-    # user.pass_hash = new_password_hash
-    # try:
-    #     db.session.commit()
-    #     logger.info(f"Contraseña restablecida para usuario {user_id}")
-    #     # Opcional: Invalidar tokens JWT activos existentes para este usuario
-    #     return {"message": "Contraseña actualizada exitosamente."}, 200
-    # except Exception as e:
-    #     db.session.rollback()
-    #     logger.error(f"Error al actualizar contraseña para usuario {user_id}: {e}")
-    #     abort(500, "Error interno al actualizar la contraseña.")
-    # --- Fin Lógica Pendiente ---
-
+    
     logger.info(f"Intento de reseteo de contraseña con token {reset_token}. TODO: Implementar validación y actualización.")
-    # Placeholder de éxito temporal
     return {"message": "Contraseña actualizada exitosamente (Placeholder - Implementar Lógica)."}, 200
 
 
-# --- Endpoint /me (sin cambios funcionales, solo se quitan prints) ---
 @auth_bp.get("/me")
 @jwt_required()
 def get_me():
@@ -225,14 +170,31 @@ def get_me():
     user = User.query.get(user_id)
     if not user:
         logger.error(f"Usuario con ID {user_id} del token no encontrado en la base de datos.")
-        # Podría significar que el usuario fue eliminado después de que el token fue emitido
         return {"message": "Usuario asociado al token no encontrado"}, 401
 
     response_data = {
         "id": user.id,
         "email": user.email,
         "role": user.role
-        # Añade 'name' si lo tienes en el modelo User
-        # "name": user.name
     }
     return response_data, 200
+
+
+# --- RUTA DE DEBUG AÑADIDA ---
+@auth_bp.get("/debug-config")
+def debug_config():
+    """Devuelve el valor de la config JWT_CSRF_PROTECT_METHODS."""
+    try:
+        # Accede a la configuración de la aplicación Flask actual
+        config_value = current_app.config.get("JWT_CSRF_PROTECT_METHODS")
+        default_value = current_app.config.get("JWT_CSRF_METHODS") # Esta es la config por defecto
+        
+        return jsonify(
+            config_cargada=config_value,
+            config_por_defecto=default_value
+        ), 200
+    except Exception as e:
+        logger.error(f"Error en debug-config: {e}")
+        return jsonify(error=str(e)), 500
+# --- FIN DE RUTA DE DEBUG ---
+

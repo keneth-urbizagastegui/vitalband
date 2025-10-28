@@ -1,8 +1,8 @@
 import http from "./http";
 
 /* ===========================
-   Tipos Compartidos (Expandidos)
-   =========================== */
+    Tipos Compartidos (Expandidos)
+    =========================== */
 
 export type Role = "admin" | "client";
 
@@ -14,7 +14,8 @@ export type User = {
   name?: string; // Si el backend lo devuelve en /login o /me
 };
 
-// Información detallada del Paciente (viene del backend PatientResponse)
+// ... (el resto de tus tipos 'PatientDetail', 'Device', 'Reading', etc. van aquí - sin cambios) ...
+// (He omitido el resto de tipos para brevedad, no los cambies)
 export type PatientDetail = {
   id: number;
   user_id: number;
@@ -29,8 +30,6 @@ export type PatientDetail = {
   weight_kg?: string | null; // Viene como string del backend (Decimal)
   created_at: string; // ISO 8601
 };
-
-// Información del Dispositivo (viene del backend DeviceResponse)
 export type Device = {
   id: number;
   patient_id: number | null;
@@ -39,8 +38,6 @@ export type Device = {
   status: "new" | "active" | "lost" | "retired" | "service";
   registered_at: string; // ISO 8601
 };
-
-// Lectura Biométrica (viene del backend ReadingResponse)
 export type Reading = {
   id: number; // ID es requerido según el schema de respuesta
   device_id: number; // ID es requerido según el schema de respuesta
@@ -50,8 +47,6 @@ export type Reading = {
   temp_c?: string | null; // Viene como string (Decimal places=1)
   motion_level?: number | null;
 };
-
-// Telemetría del Dispositivo (viene del backend DeviceTelemetryResponse)
 export type DeviceTelemetry = {
   id: number;
   device_id: number;
@@ -62,8 +57,6 @@ export type DeviceTelemetry = {
   rssi_dbm?: number | null;
   board_temp_c?: string | null; // Viene como string (Decimal places=1)
 };
-
-// Alerta (viene del backend AlertResponse)
 export type Alert = {
   id: number;
   patient_id: number;
@@ -74,8 +67,6 @@ export type Alert = {
   acknowledged_by: number | null; // User ID
   acknowledged_at: string | null; // ISO 8601
 };
-
-// Umbral (viene del backend ThresholdResponse)
 export type Threshold = {
   id: number;
   patient_id: number | null; // Null si es global
@@ -84,27 +75,19 @@ export type Threshold = {
   max_value: string | null; // Viene como string (Decimal)
   created_at: string; // ISO 8601
 };
-
-// Tipo para parámetros de rango de fechas
 export type DateRangeParams = {
   from?: string; // ISO 8601 string
   to?: string; // ISO 8601 string
   limit?: number;
 };
-
-// Tipo genérico para respuestas de lista del backend
 type ListResponse<T> = {
   items: T[];
-  // Podrías añadir paginación aquí si el backend la implementa
-  // total?: number;
-  // page?: number;
-  // per_page?: number;
 };
 
 
 /* ===========================
-   Helpers de storage (Sin cambios)
-   =========================== */
+    Helpers de storage (Sin cambios)
+    =========================== */
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
@@ -128,8 +111,8 @@ export function logout() {
 }
 
 /* ===========================
-   AUTH API Calls
-   =========================== */
+    AUTH API Calls
+    =========================== */
 
 // login (Modificado ligeramente para coincidir con backend)
 export async function login(email: string, password: string): Promise<{ token: string; user: User }> {
@@ -143,11 +126,16 @@ export async function login(email: string, password: string): Promise<{ token: s
     throw new Error("Respuesta de login inválida del servidor.");
   }
 
+  // --- LÍNEA AÑADIDA PARA EL PASO 2 ---
+  console.log(`PASO 2 (Endpoints): Token recibido del backend y a punto de guardar: ${token}`);
+  // --- FIN DE LÍNEA AÑADIDA ---
+
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   return { token, user };
 }
 
+// ... (El resto de tus funciones: register, forgotPassword, resetPassword, getMe, etc. se mantienen igual) ...
 // NUEVO: Registro
 export async function register(userData: { name: string; email: string; password: string; confirm_password?: string }): Promise<{ message: string; user: User; access_token?: string }> {
   // El backend devuelve { message, user, access_token? }
@@ -175,16 +163,16 @@ export async function resetPassword(token: string, new_password: string, confirm
 
 // NUEVO: Obtener info del usuario actual (si se necesita refrescar)
 export async function getMe(): Promise<User> {
-   const { data } = await http.get<User>("/auth/me");
-   // Actualiza el usuario en localStorage si es necesario
-   localStorage.setItem(USER_KEY, JSON.stringify(data));
-   return data;
+    const { data } = await http.get<User>("/auth/me");
+    // Actualiza el usuario en localStorage si es necesario
+    localStorage.setItem(USER_KEY, JSON.stringify(data));
+    return data;
 }
 
 
 /* ===========================
-   CLIENT API Calls (/me/*)
-   =========================== */
+    CLIENT API Calls (/me/*)
+    =========================== */
 
 // NUEVO: Obtener perfil del paciente logueado
 export async function getMyProfile(): Promise<PatientDetail> {
@@ -218,8 +206,8 @@ export async function getMyAlerts(params?: { limit?: number; acknowledged?: bool
 
 
 /* ===========================
-   ADMIN API Calls (/admin/*)
-   =========================== */
+    ADMIN API Calls (/admin/*)
+    =========================== */
 
 // --- Admin: Pacientes ---
 
@@ -307,8 +295,8 @@ export async function acknowledgeAlertAdmin(alertId: number, notes?: string): Pr
 // --- Admin: Umbrales ---
 
 export async function getGlobalThresholdsAdmin(): Promise<Threshold[]> {
-   const { data } = await http.get<ListResponse<Threshold>>("/admin/thresholds/global");
-   return data?.items ?? [];
+    const { data } = await http.get<ListResponse<Threshold>>("/admin/thresholds/global");
+    return data?.items ?? [];
 }
 
 export type ThresholdUpdateData = { min_value?: number | string | null; max_value?: number | string | null };
@@ -318,8 +306,8 @@ export async function setGlobalThresholdAdmin(metric: string, thresholdData: Thr
 }
 
 export async function getPatientThresholdsAdmin(patientId: number): Promise<Threshold[]> {
-   const { data } = await http.get<ListResponse<Threshold>>(`/admin/patients/${patientId}/thresholds`);
-   return data?.items ?? [];
+    const { data } = await http.get<ListResponse<Threshold>>(`/admin/patients/${patientId}/thresholds`);
+    return data?.items ?? [];
 }
 
 export async function setPatientThresholdAdmin(patientId: number, metric: string, thresholdData: ThresholdUpdateData): Promise<Threshold> {
@@ -329,8 +317,8 @@ export async function setPatientThresholdAdmin(patientId: number, metric: string
 
 
 /* ===========================
-   TELEMETRÍA (Lectura puede ser para Admin o Cliente)
-   =========================== */
+    TELEMETRÍA (Lectura puede ser para Admin o Cliente)
+    =========================== */
 
 export async function listDeviceTelemetry(deviceId: number, params?: DateRangeParams): Promise<DeviceTelemetry[]> {
   const { data } = await http.get<ListResponse<DeviceTelemetry>>(`/devices/${deviceId}/telemetry`, { params });
@@ -339,8 +327,8 @@ export async function listDeviceTelemetry(deviceId: number, params?: DateRangePa
 // NOTA: POST /devices/<id>/telemetry (escritura) probablemente no se llama desde el frontend React.
 
 /* ===========================
-   CHATBOT API Calls
-   =========================== */
+    CHATBOT API Calls
+    =========================== */
 
 // NUEVO: Enviar consulta al chatbot
 export async function queryChatbot(message: string): Promise<{ reply: string }> {

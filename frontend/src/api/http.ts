@@ -13,6 +13,9 @@ const http = axios.create({
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
+    // --- LÍNEA AÑADIDA PARA EL PASO 3 ---
+    console.log(`PASO 3 (HTTP): Token leído de localStorage y a punto de enviar: ${token}`);
+    // --- FIN DE LÍNEA AÑADIDA ---
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -51,10 +54,10 @@ http.interceptors.response.use(
 
       // Redirige a la página de login (si no estamos ya ahí)
       if (window.location.pathname !== '/login') {
-         // Guarda la ruta actual para redirigir después del login (opcional)
-         const currentPath = window.location.pathname + window.location.search;
-         // Usa replace para evitar que el usuario vuelva atrás a la página protegida
-         window.location.replace(`/login?from=${encodeURIComponent(currentPath)}`);
+          // Guarda la ruta actual para redirigir después del login (opcional)
+          const currentPath = window.location.pathname + window.location.search;
+          // Usa replace para evitar que el usuario vuelva atrás a la página protegida
+          window.location.replace(`/login?from=${encodeURIComponent(currentPath)}`);
       }
       // --- Fin Lógica Deslogueo ---
     }

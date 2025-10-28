@@ -13,6 +13,13 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
         minutes=int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  # 8h por defecto
     )
+    
+    # --- LÍNEA AÑADIDA PARA SOLUCIONAR EL ERROR 401 ---
+    # Le dice a JWT que solo proteja contra CSRF las peticiones
+    # que modifican datos, pero no las peticiones GET (común para APIs).
+    JWT_CSRF_PROTECT_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
+    # --- FIN DE LÍNEA AÑADIDA ---
+
     # Si quieres habilitar refresh en el futuro:
     # JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
 
@@ -32,7 +39,7 @@ class Config:
     # Conexión estable a MySQL (evita "MySQL server has gone away")
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 280,         # < 300s para cortar conexiones zombies
+        "pool_recycle": 280,      # < 300s para cortar conexiones zombies
         "pool_size": int(os.getenv("DB_POOL_SIZE", "5")),
         "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "10")),
     }
