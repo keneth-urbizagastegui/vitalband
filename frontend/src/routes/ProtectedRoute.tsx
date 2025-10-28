@@ -1,11 +1,15 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute() {
-  const { user, loading } = useAuth();
-  const location = useLocation();
+  const { user } = useAuth();
 
-  if (loading) return <div className="p-6">Cargando…</div>;
-  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  // Si no hay usuario (no logueado), redirige a /login
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Si hay usuario, renderiza el contenido de la ruta (el "Outlet")
+  // En nuestro caso, el Outlet será el ClientLayout
   return <Outlet />;
 }
