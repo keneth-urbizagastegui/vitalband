@@ -3,7 +3,7 @@ USE vitalband;
 -- Hash de ejemplo (reemplaza luego por tu propio hash seguro)
 -- Contraseña de demo para ambos: Admin123!
 -- (Luego cámbiala y usa generate_password_hash en Python)
-SET @demo_hash = '$pbkdf2-sha256$29000$0b4H7m0y0b9S0nW1m9YbMw$4oX2h8u7y0l6P3NwVv7zO5f6V3qC2tKf8w4O3l0Fq7s';
+SET @demo_hash = 'pbkdf2:sha256:29000$CB0f3uEWIVds1gAK$c96764f2ebf01ac4642bda3e097d301673e97c8b29124b3561e1a53764b12d8c';
 
 -- Admin
 INSERT INTO users (name, email, pass_hash, role)
