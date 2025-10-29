@@ -11,6 +11,9 @@ import AdminLayout from "./components/layout/AdminLayout";
 
 // Páginas Públicas
 import Login from "./pages/Login";
+// --- 1. AÑADE LAS IMPORTACIONES DE LAS PÁGINAS PÚBLICAS ---
+import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 // Páginas de Cliente
 import Dashboard from "./pages/Dashboard";
@@ -18,14 +21,14 @@ import HistoryPage from "./pages/HistoryPage";
 import AlertsPage from "./pages/AlertsPage";
 import ProfilePage from "./pages/ProfilePage";
 
-// --- PÁGINAS DE ADMIN (ACTUALIZADO) ---
-import AdminPanel from "./pages/AdminPanel"; // El Dashboard de Admin
-import AdminPatientsPage from "./pages/AdminPatientsPage"; // La tabla de pacientes
-import AdminPatientCreatePage from "./pages/AdminPatientCreatePage"; // Formulario para crear paciente
-import AdminPatientDetailPage from "./pages/AdminPatientDetailPage"; // El detalle de un paciente
-import AdminDevicesPage from "./pages/AdminDevicesPage"; // La tabla de dispositivos
-import AdminDeviceCreatePage from "./pages/AdminDeviceCreatePage"; // Formulario para crear dispositivo
-import AdminSettingsPage from "./pages/AdminSettingsPage"; // La página de Umbrales Globales
+// --- PÁGINAS DE ADMIN (COMPLETAS) ---
+import AdminPanel from "./pages/AdminPanel";
+import AdminPatientsPage from "./pages/AdminPatientsPage";
+import AdminPatientCreatePage from "./pages/AdminPatientCreatePage";
+import AdminPatientDetailPage from "./pages/AdminPatientDetailPage";
+import AdminDevicesPage from "./pages/AdminDevicesPage";
+import AdminDeviceCreatePage from "./pages/AdminDeviceCreatePage";
+import AdminSettingsPage from "./pages/AdminSettingsPage";
 
 export default function App() {
   return (
@@ -33,6 +36,12 @@ export default function App() {
       {/* --- Rutas Públicas --- */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+
+      {/* --- 2. REEMPLAZA LOS PLACEHOLDERS --- */}
+      <Route path="/signup" element={<RegisterPage />} />
+      <Route path="/forgot" element={<ForgotPasswordPage />} />
+      {/* --- FIN MODIFICACIÓN --- */}
+
 
       {/* --- Rutas Protegidas (Requieren Login) --- */}
       <Route element={<ProtectedRoute />}>
@@ -55,33 +64,20 @@ export default function App() {
             </RoleGuard>
           }
         >
-          {/* --- RUTAS DE ADMIN (ACTUALIZADO) --- */}
-          
-          {/* /admin */}
+          {/* Rutas de Admin */}
           <Route index element={<AdminPanel />} />
-          
-          {/* /admin/patients */}
           <Route path="patients" element={<AdminPatientsPage />} />
-          {/* /admin/patients/new */}
           <Route path="patients/new" element={<AdminPatientCreatePage />} />
-          {/* /admin/patients/123 */}
           <Route path="patients/:id" element={<AdminPatientDetailPage />} />
-
-          {/* /admin/devices */}
           <Route path="devices" element={<AdminDevicesPage />} />
-          {/* /admin/devices/new */}
           <Route path="devices/new" element={<AdminDeviceCreatePage />} />
-          
-          {/* /admin/settings */}
           <Route path="settings" element={<AdminSettingsPage />} />
-          
-        </Route> {/* <-- Se cierra la ruta padre de /admin */}
+        </Route>
 
       </Route>
 
-      {/* --- Placeholders y 404 --- */}
-      <Route path="/forgot" element={<div className="p-6">Página para Recuperar Contraseña (Pendiente)</div>} />
-      <Route path="/signup" element={<div className="p-6">Página de Registro (Pendiente)</div>} />
+      {/* --- 404 --- */}
+      {/* Mueve esta ruta al final para que capture todo lo demás */}
       <Route path="*" element={<div className="p-6">404 - No encontrado</div>} />
     </Routes>
   );
