@@ -14,14 +14,19 @@ class Config:
         minutes=int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  # 8h por defecto
     )
     
-    # --- LÍNEA AÑADIDA PARA SOLUCIONAR EL ERROR 401 ---
     # Le dice a JWT que solo proteja contra CSRF las peticiones
-    # que modifican datos, pero no las peticiones GET (común para APIs).
+    # que modifican datos (si se usa CSRF con cookies).
     JWT_CSRF_PROTECT_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
-    # --- FIN DE LÍNEA AÑADIDA ---
-
-    # Si quieres habilitar refresh en el futuro:
-    # JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
+    
+    # --- ¡ESTA ES LA LÍNEA DE LA SOLUCIÓN FINAL (CORREGIDA)! ---
+    # El nombre correcto de la variable es JWT_CSRF_IN_ACCESS_TOKEN
+    # (no JWT_CSRF_IN_TOKEN). Esto deshabilita el claim 'csrf'
+    # en los tokens de acceso.
+    JWT_CSRF_IN_ACCESS_TOKEN = False
+    
+    # (Buena práctica) Deshabilítalo también en los tokens de refresco
+    JWT_CSRF_IN_REFRESH_TOKEN = False
+    # --- FIN DE LA SOLUCIÓN ---
 
     # SQLAlchemy
     SQLALCHEMY_TRACK_MODIFICATIONS = False

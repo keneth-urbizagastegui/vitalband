@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from .config import Config
 from .extensions import db, migrate, cors, jwt
+# from .model.models import User  <-- ¡MOVIDA! Este import en la parte superior causaba el error.
 
 from .controller.auth_controller import auth_bp
 from .controller.client_controller import client_bp
@@ -22,8 +23,54 @@ def create_app(config_object: type[Config] | str = Config):
     )
     jwt.init_app(app)
 
+    # --- INICIO DE LA SOLUCIÓN (CON PRINT() PARA DEBUG) ---
+    print("--- REGISTRANDO EL USER LOADER ---") # <-- Veremos esto en el reinicio
+    
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        """
+        Registra una función que se llama en cada petición protegida
+        para cargar el usuario actual basado en el ID (sub) del token.
+        """
+        
+        print("\n--- INICIO USER LOADER ---") # <-- Veremos esto en la petición GET
+        
+        # Importa el modelo User aquí adentro para evitar
+        # problemas de importación circular al inicio.
+        from .model.models import User
+        
+        identity = jwt_data.get("sub")
+        
+        if not identity:
+            print("USER_LOADER_ERROR: No se encontró 'sub' (identity) en el token.")
+            return None
+            
+        try:
+            user_id = int(identity)
+            
+            print(f"USER_LOADER_INFO: Buscando usuario con ID: {user_id} (Tipo: {type(user_id)})")
+            
+            user = User.query.get(user_id)
+            
+            if not user:
+                print(f"USER_LOADER_WARNING: Usuario con ID {user_id} no encontrado en la BD.")
+                return None
+                
+            print(f"USER_LOADER_SUCCESS: Usuario {user.email} cargado exitosamente.")
+            print("--- FIN USER LOADER ---\n")
+            return user
+            
+        except ValueError:
+            print(f"USER_LOADER_ERROR: 'sub' del token no era un entero válido: {identity}")
+            return None
+        except Exception as e:
+            print(f"USER_LOADER_ERROR: Error inesperado al cargar usuario: {e}")
+            return None
+    # --- FIN DE LA SOLUCIÓN ---
+
     # Handlers de errores JWT
     @jwt.unauthorized_loader
+    # ... (tu código de handlers existente) ...
     def _missing_jwt(reason: str):
         return jsonify({"message": "Missing or invalid JWT", "reason": reason}), 401
 
@@ -51,3 +98,4 @@ def create_app(config_object: type[Config] | str = Config):
         return {"status": "ok"}, 200
 
     return app
+
