@@ -29,25 +29,15 @@ _device_out_many = DeviceResponse(many=True)
 
 # === Helper REESCRITO para usar current_user ===
 def _get_patient_from_jwt() -> dict:
-    """
-    Obtiene el usuario actual (cargado por el user_loader)
-    y devuelve un dict de paciente simulado o real.
-    """
     user: User = current_user
-
     if not user:
         abort(401, description="Usuario no encontrado para este token.")
 
-    # --- Lógica REAL (reemplaza placeholder si tienes PatientsService.get_by_user_id) ---
-    # Intenta obtener el paciente real asociado al user_id del token
+    # --- ASEGÚRATE QUE ESTA ES LA LÓGICA ACTIVA ---
     patient = _patients_service.get_by_user_id(user.id) # Usa el método del servicio
     if not patient:
-         # Si no se encuentra un paciente asociado, lanzar error
-         abort(404, description=f"Perfil de paciente no encontrado para el usuario {user.email} (ID: {user.id}).")
-
-    # Devuelve un diccionario simple con la información necesaria
+         abort(404, description=f"Perfil de paciente no encontrado para el usuario {user.email} (ID: {user.id}).") # <-- ESTE ES EL 404
     return {"id": patient.id, "user_id": user.id, "email": user.email}
-    # --- Fin Lógica REAL ---
 
 # === Rutas para el Cliente (Actualizadas) ===
 
