@@ -1,68 +1,64 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode"; // <-- 1. Re-import the decoding function
 
-// Define las claves aquí o impórtalas si las centralizas en otro lugar
+// Define the storage keys
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
 
+// --- 2. Re-add the type for the decoded payload ---
+type DecodedJwtPayload = {
+  csrf?: string; // The CSRF claim added by Flask-JWT-Extended
+  [key: string]: any; // Allow other fields
+};
+
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // ej: http://localhost:5000/api/v1
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 15000,
 });
 
-// === Request: adjunta JWT si existe ===
+// === Request Interceptor: Attach JWT and X-CSRF-TOKEN if they exist ===
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
-    // --- LÍNEA AÑADIDA PARA EL PASO 3 ---
-    console.log(`PASO 3 (HTTP): Token leído de localStorage y a punto de enviar: ${token}`);
-    // --- FIN DE LÍNEA AÑADIDA ---
+    // Attach the Bearer token
     config.headers.Authorization = `Bearer ${token}`;
+    console.log(`PASO 3 (HTTP): Token read from localStorage: ${token}`);
+
+    // --- 3. RE-ADD THE CSRF DECODING AND HEADER LOGIC ---
+    try {
+      const decoded = jwtDecode<DecodedJwtPayload>(token);
+      const csrfToken = decoded?.csrf; // Extract the value from the 'csrf' claim
+
+      if (csrfToken) {
+        // Add the X-CSRF-TOKEN header
+        config.headers["X-CSRF-TOKEN"] = csrfToken;
+        console.log(`PASO 3.1 (HTTP): Adding X-CSRF-TOKEN header: ${csrfToken}`);
+      } else {
+         console.warn("PASO 3.1 (HTTP): Could not find 'csrf' claim in the decoded token.");
+      }
+    } catch (e) {
+      console.error("PASO 3.1 (HTTP): Error decoding JWT or extracting CSRF:", e);
+    }
+    // --- END RE-ADDITION ---
   }
   return config;
 });
 
-// === Response: normaliza errores y maneja 401 ===
+
+// === Response Interceptor: Normalize errors and handle 401 ===
 http.interceptors.response.use(
   (r) => r,
   async (error) => {
-    const originalRequest = error.config; // Guarda la configuración original
-
-    // Verifica si es un error 401 y no es un reintento (si tuvieras lógica de refresh)
+    const originalRequest = error.config;
     if (error?.response?.status === 401 && !originalRequest._retry) {
-      // originalRequest._retry = true; // Marca como reintento si implementas refresh
-
-      // --- Lógica de Refresh Token (Comentada - requiere backend) ---
-      // try {
-      //   const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh`, {}, { withCredentials: true });
-      //   localStorage.setItem(TOKEN_KEY, data.access_token);
-      //   // Actualiza el header de la petición original y reinténtala
-      //   originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-      //   return http(originalRequest);
-      // } catch (refreshError) {
-      //   // Si el refresh falla, procede a desloguear
-      //   console.error("Refresh token failed:", refreshError);
-      //   // (Continúa con la lógica de abajo)
-      // }
-      // --- Fin Lógica Refresh ---
-
-      // --- Lógica de Deslogueo por 401 (sin refresh o si refresh falla) ---
-      console.error("Error 401: No autorizado o token expirado. Deslogueando...");
-
-      // Replica la lógica de logout() de endpoints.ts
+      console.error("Error 401: Unauthorized. Logging out...");
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-
-      // Redirige a la página de login (si no estamos ya ahí)
       if (window.location.pathname !== '/login') {
-          // Guarda la ruta actual para redirigir después del login (opcional)
           const currentPath = window.location.pathname + window.location.search;
-          // Usa replace para evitar que el usuario vuelva atrás a la página protegida
           window.location.replace(`/login?from=${encodeURIComponent(currentPath)}`);
       }
-      // --- Fin Lógica Deslogueo ---
     }
-
-    // Para otros errores o si ya se manejó el 401, rechaza la promesa
     return Promise.reject(error);
   }
 );

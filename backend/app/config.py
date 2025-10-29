@@ -13,25 +13,22 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
         minutes=int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  # 8h por defecto
     )
-    
-    # Le dice a JWT que solo proteja contra CSRF las peticiones
-    # que modifican datos (si se usa CSRF con cookies).
+
+    # --- RESTAURAR Y ASEGURAR QUE TODO ESTÉ EN FALSE ---
     JWT_CSRF_PROTECT_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
-    
-    # --- ¡ESTA ES LA LÍNEA DE LA SOLUCIÓN FINAL (CORREGIDA)! ---
-    # El nombre correcto de la variable es JWT_CSRF_IN_ACCESS_TOKEN
-    # (no JWT_CSRF_IN_TOKEN). Esto deshabilita el claim 'csrf'
-    # en los tokens de acceso.
     JWT_CSRF_IN_ACCESS_TOKEN = False
-    
-    # (Buena práctica) Deshabilítalo también en los tokens de refresco
     JWT_CSRF_IN_REFRESH_TOKEN = False
-    # --- FIN DE LA SOLUCIÓN ---
+    JWT_COOKIE_CSRF_PROTECT = False
+    # --- FIN RESTAURACIÓN ---
+
+    # --- NUEVO: Especificar explícitamente la ubicación del token ---
+    JWT_TOKEN_LOCATION = ["headers"] # Asegura que busque en 'Authorization: Bearer'
+    # --- FIN NUEVO ---
 
     # SQLAlchemy
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_USER = os.getenv("DB_USER", "root")
-    DB_PASS = os.getenv("DB_PASS", "")  # en XAMPP a veces está vacío
+    DB_PASS = os.getenv("DB_PASS", "")
     DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
     DB_PORT = os.getenv("DB_PORT", "3306")
     DB_NAME = os.getenv("DB_NAME", "vitalband")
@@ -41,10 +38,9 @@ class Config:
         f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
 
-    # Conexión estable a MySQL (evita "MySQL server has gone away")
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 280,      # < 300s para cortar conexiones zombies
+        "pool_recycle": 280,
         "pool_size": int(os.getenv("DB_POOL_SIZE", "5")),
         "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "10")),
     }
@@ -57,6 +53,6 @@ class Config:
     # Debug
     DEBUG = _bool(os.getenv("FLASK_DEBUG", "1"))
 
-    # JSON (opcional: respuestas más compactas)
+    # JSON
     JSON_SORT_KEYS = False
     JSONIFY_PRETTYPRINT_REGULAR = _bool(os.getenv("JSON_PRETTY", "0"))
