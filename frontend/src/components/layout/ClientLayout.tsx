@@ -16,12 +16,16 @@ type NavItemProps = {
 };
 
 function NavItem({ to, children /*, icon*/ }: NavItemProps) {
+  // CLASES CORREGIDAS:
+  // 'activeClass' ya usaba bg-primary-700, lo cual es correcto.
+  // 'inactiveClass' ahora usa text-primary-100 (que añadiremos a tailwind)
   const activeClass = "bg-primary-700 text-white";
-  const inactiveClass = "text-primary-100 hover:bg-primary-600 hover:text-white";
+  const inactiveClass = "text-primary-100 hover:bg-primary-600 hover:text-white"; // <-- 'text-primary-100' es la clave
 
   return (
     <NavLink
       to={to}
+      end={to === "/dashboard" ? true : false} // Asegura que 'Dashboard' solo esté activo en su ruta exacta
       className={({ isActive }) =>
         `flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
           isActive ? activeClass : inactiveClass
@@ -50,26 +54,33 @@ export default function ClientLayout() {
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       {/* --- Sidebar (Barra Lateral) --- */}
-      <div className="hidden border-r bg-primary-800 text-white lg:block">
+      {/* === CAMBIO AQUÍ === */}
+      {/* Usamos bg-primary-700 (que sí existe) en lugar de 800 */}
+      <div className="hidden border-r bg-primary-700 text-white lg:block"> 
+      {/* === FIN CAMBIO === */}
         <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-[60px] items-center border-b border-primary-700 px-6">
+          {/* === CAMBIO AQUÍ === */}
+          {/* Usamos border-primary-600 (que sí existe) en lugar de 700 */}
+          <div className="flex h-[60px] items-center border-b border-primary-600 px-6"> 
+          {/* === FIN CAMBIO === */}
             <h1 className="text-xl font-bold text-white">App de Salud</h1>
-            {/*  */}
+            {/* */}
           </div>
           <nav className="flex-1 overflow-auto px-4 py-4">
             <ul className="space-y-2">
               {/* Aquí van los links a tus páginas */}
+              {/* CAMBIO: La ruta de Dashboard es /dashboard, no / */}
               <li>
-                <NavItem to="/dashboard">Dashboard</NavItem> {/* Asume que la ruta es /dashboard */}
+                <NavItem to="/dashboard">Dashboard</NavItem>
               </li>
               <li>
-                <NavItem to="/history">Historial</NavItem> {/* Asume que la ruta es /history */}
+                <NavItem to="/history">Historial</NavItem>
               </li>
               <li>
-                <NavItem to="/alerts">Alertas</NavItem> {/* Asume que la ruta es /alerts */}
+                <NavItem to="/alerts">Alertas</NavItem>
               </li>
               <li>
-                <NavItem to="/profile">Mi Perfil</NavItem> {/* Asume que la ruta es /profile */}
+                <NavItem to="/profile">Mi Perfil</NavItem>
               </li>
             </ul>
           </nav>
