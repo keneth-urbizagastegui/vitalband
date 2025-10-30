@@ -75,6 +75,7 @@ export default function AdminDeviceCreatePage() {
         <div className="space-y-4">
           <div>
             <label htmlFor="serial" className="block text-sm font-medium text-muted">Número de Serie <span className="text-red-500">*</span></label>
+            {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
             <input
               type="text"
               name="serial"
@@ -82,12 +83,13 @@ export default function AdminDeviceCreatePage() {
               value={formData.serial}
               onChange={handleChange}
               required
-              className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+              className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
               placeholder="Ej: ABC-12345678"
             />
           </div>
           <div>
             <label htmlFor="model" className="block text-sm font-medium text-muted">Modelo <span className="text-red-500">*</span></label>
+            {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
             <input
               type="text"
               name="model"
@@ -95,18 +97,19 @@ export default function AdminDeviceCreatePage() {
               value={formData.model}
               onChange={handleChange}
               required
-              className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+              className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
               placeholder="Ej: HealthBand v3"
             />
           </div>
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-muted">Estado Inicial</label>
+            {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
             <select
               name="status"
               id="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+              className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
             >
               <option value="new">Nuevo</option>
               <option value="active">Activo</option>

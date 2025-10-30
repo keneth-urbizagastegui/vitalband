@@ -57,11 +57,11 @@ export default function AdminPatientCreatePage() {
 
     try {
       // --- Paso 1: Registrar el Usuario ---
-      // El 'name' para el registro puede ser el nombre completo
       const newUserData = {
         name: `${formData.first_name} ${formData.last_name}`,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        confirm_password: formData.password
       };
       const registerResponse = await register(newUserData);
       
@@ -72,12 +72,11 @@ export default function AdminPatientCreatePage() {
       const newUserId = registerResponse.user.id;
 
       // --- Paso 2: Crear el Perfil del Paciente ---
-      // Prepara los datos del paciente, vinculando el newUserId
       const patientData: PatientCreateData = {
         user_id: newUserId,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        email: formData.email, // El email de contacto puede ser el mismo
+        email: formData.email, 
         phone: formData.phone || null,
         birthdate: formData.birthdate || null,
         sex: formData.sex,
@@ -89,15 +88,44 @@ export default function AdminPatientCreatePage() {
 
       // --- Éxito ---
       setLoading(false);
-      // Redirige a la lista de pacientes
       navigate("/admin/patients"); 
 
     } catch (err: any) {
       console.error("Error creating patient:", err);
-      // Deshace el usuario si el perfil del paciente falla؟ (Lógica avanzada)
-      // Por ahora, solo muestra el error
-      const msg = err?.response?.data?.message || err?.message || "No se pudo crear el paciente.";
-      setError(msg);
+
+      // --- INICIO DE LA MODIFICACIÓN (LÓGICA DE ERROR MEJORADA) ---
+      let friendlyMessage = "No se pudo crear el paciente."; // Mensaje por defecto
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        
+        if (data.description) {
+          // Para errores 409 (Conflict) o 403 (Forbidden) de abort()
+          friendlyMessage = data.description;
+        
+        } else if (data.message) {
+          // Para errores genéricos que sí devuelven un 'message'
+          friendlyMessage = data.message;
+        
+        } else if (data.messages) {
+          // Para errores 400 (Validación de Marshmallow)
+          // data.messages es un objeto, ej: { password: ["La contraseña..."] }
+          try {
+            // Tomamos el primer error que encontremos
+            const firstErrorField = Object.keys(data.messages)[0];
+            const firstErrorMessage = data.messages[firstErrorField][0];
+            friendlyMessage = firstErrorMessage;
+          } catch (e) {
+            friendlyMessage = "Hubo un error de validación. Revisa los campos.";
+          }
+        }
+      } else if (err.message) {
+         // Si no hay 'response.data' (ej. error de red), usa el mensaje genérico
+         friendlyMessage = err.message;
+      }
+      // --- FIN DE LA MODIFICACIÓN ---
+
+      setError(friendlyMessage);
       setLoading(false);
     }
   };
@@ -115,7 +143,8 @@ export default function AdminPatientCreatePage() {
       </div>
 
       {/* --- Formulario --- */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border shadow-sm p-6 max-w-3xl">
+      {/* MODIFICACIÓN: Se cambió max-w-3xl por max-w-5xl para hacerlo más grande */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl border shadow-sm p-8 max-w-5xl">
         
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{error}</div>
@@ -127,11 +156,13 @@ export default function AdminPatientCreatePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-muted">Email (Login) <span className="text-red-500">*</span></label>
-              <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-muted">Contraseña <span className="text-red-500">*</span></label>
-              <input type="password" name="password" id="password" value={formData.password} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="password" name="password" id="password" value={formData.password} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
           </div>
         </div>
@@ -142,23 +173,28 @@ export default function AdminPatientCreatePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="first_name" className="block text-sm font-medium text-muted">Nombre <span className="text-red-500">*</span></label>
-              <input type="text" name="first_name" id="first_name" value={formData.first_name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="text" name="first_name" id="first_name" value={formData.first_name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="last_name" className="block text-sm font-medium text-muted">Apellido <span className="text-red-500">*</span></label>
-              <input type="text" name="last_name" id="last_name" value={formData.last_name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="text" name="last_name" id="last_name" value={formData.last_name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-muted">Teléfono</label>
-              <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="birthdate" className="block text-sm font-medium text-muted">Fecha de Nacimiento</label>
-              <input type="date" name="birthdate" id="birthdate" value={formData.birthdate} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="date" name="birthdate" id="birthdate" value={formData.birthdate} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="sex" className="block text-sm font-medium text-muted">Sexo</label>
-              <select name="sex" id="sex" value={formData.sex} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm">
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <select name="sex" id="sex" value={formData.sex} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white">
                 <option value="unknown">No especificado</option>
                 <option value="male">Masculino</option>
                 <option value="female">Femenino</option>
@@ -167,11 +203,13 @@ export default function AdminPatientCreatePage() {
             </div>
             <div>
               <label htmlFor="height_cm" className="block text-sm font-medium text-muted">Altura (cm)</label>
-              <input type="number" name="height_cm" id="height_cm" value={formData.height_cm} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="number" name="height_cm" id="height_cm" value={formData.height_cm} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="weight_kg" className="block text-sm font-medium text-muted">Peso (kg)</label>
-              <input type="number" name="weight_kg" id="weight_kg" value={formData.weight_kg} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Se cambió a border-slate-400 y se añadió bg-white */}
+              <input type="number" name="weight_kg" id="weight_kg" value={formData.weight_kg} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
           </div>
         </div>

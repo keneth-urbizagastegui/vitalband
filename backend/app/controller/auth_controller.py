@@ -13,6 +13,7 @@ from ..model.dto.response_schemas import UserResponse
 
 from ..model.models import User
 from ..extensions import db
+from ..services.patients_service import PatientsService
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -22,6 +23,7 @@ _register_in = RegisterRequest()
 _forgot_password_in = ForgotPasswordRequest()
 _reset_password_in = ResetPasswordRequest()
 _user_out = UserResponse()
+_patients_service = PatientsService()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO) # Mantenemos logging visible
@@ -97,11 +99,31 @@ def register():
         db.session.refresh(new_user)
         logger.info(f"Nuevo usuario registrado: {new_user.id} ({email})")
 
+        # --- INICIO DE LA MODIFICACIÓN ---
+        # Ahora, crea automáticamente el perfil de paciente asociado
+        try:
+            # Extrae nombres del campo 'name'
+            name_parts = name.split(' ', 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else "" # Apellido opcional
+
+            _patients_service.create_patient(
+                user_id=new_user.id,
+                first_name=first_name,
+                last_name=last_name,
+                email=email # Puede usar el mismo email
+            )
+            logger.info(f"Perfil de paciente creado automáticamente para user_ID {new_user.id}")
+        except Exception as e:
+            # Si esto falla, el registro de usuario debe deshacerse (rollback)
+            logger.error(f"¡FALLO CRÍTICO! El usuario {new_user.id} se creó, pero su perfil de paciente falló: {e}")
+            # Lanza el error para que el 'except' de abajo lo capture y haga rollback
+            raise e
+        # --- FIN DE LA MODIFICACIÓN ---
+
         additional = {"role": new_user.role}
-        # --- MODIFICACIÓN: Convertir identity a string ---
-        user_id_str_reg = str(new_user.id) # Convertimos a string
-        token = create_access_token(identity=user_id_str_reg, additional_claims=additional) # Usamos el string
-        # --- FIN MODIFICACIÓN ---
+        user_id_str_reg = str(new_user.id) 
+        token = create_access_token(identity=user_id_str_reg, additional_claims=additional) 
 
         return {
             "message": "Usuario registrado exitosamente.",
@@ -110,8 +132,8 @@ def register():
             }, 201
 
     except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error al registrar usuario {email}: {e}")
+        db.session.rollback() # Esto deshará la creación del 'User' si el 'Patient' falla
+        logger.error(f"Error al registrar usuario {email} o su perfil: {e}")
         abort(500, description="Error interno al registrar el usuario.")
 
 # ... (resto de las funciones: forgot_password, reset_password, get_me, debug_config sin cambios) ...

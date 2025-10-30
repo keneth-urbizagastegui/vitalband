@@ -133,6 +133,7 @@ export default function AdminSettingsPage() {
               {/* Min Value Input */}
               <div>
                 <label htmlFor={`${metric}_min`} className="block text-sm font-medium text-muted">Valor Mínimo</label>
+                {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
                 <input
                   type="number"
                   step="0.1"
@@ -141,12 +142,13 @@ export default function AdminSettingsPage() {
                   value={thresholds[metric]?.min_value || ''}
                   onChange={(e) => handleChange(metric, 'min_value', e.target.value)}
                   placeholder="Ej: 50"
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
                 />
               </div>
               {/* Max Value Input */}
               <div>
                 <label htmlFor={`${metric}_max`} className="block text-sm font-medium text-muted">Valor Máximo</label>
+                {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
                 <input
                   type="number"
                   step="0.1"
@@ -155,7 +157,7 @@ export default function AdminSettingsPage() {
                   value={thresholds[metric]?.max_value || ''}
                   onChange={(e) => handleChange(metric, 'max_value', e.target.value)}
                   placeholder="Ej: 120"
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
                 />
               </div>
             </div>

@@ -43,6 +43,7 @@ function DetailItem({ label, value }: DetailItemProps) {
 
 // ===================================================================
 // --- PESTAÑA 1: PERFIL DEL PACIENTE (CON EDICIÓN) ---
+// (REEMPLAZA ESTE COMPONENTE COMPLETO)
 // ===================================================================
 type ProfileTabProps = {
   patient: PatientDetail;
@@ -117,27 +118,33 @@ function PatientProfileTab({ patient, onUpdate }: ProfileTabProps) {
           <>
             <div>
               <label htmlFor="first_name" className="block text-sm font-medium text-muted">Nombre</label>
-              <input type="text" name="first_name" id="first_name" value={formData.first_name || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="text" name="first_name" id="first_name" value={formData.first_name || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="last_name" className="block text-sm font-medium text-muted">Apellido</label>
-              <input type="text" name="last_name" id="last_name" value={formData.last_name || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="text" name="last_name" id="last_name" value={formData.last_name || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-muted">Email</label>
-              <input type="email" name="email" id="email" value={formData.email || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="email" name="email" id="email" value={formData.email || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-muted">Teléfono</label>
-              <input type="tel" name="phone" id="phone" value={formData.phone || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="tel" name="phone" id="phone" value={formData.phone || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="birthdate" className="block text-sm font-medium text-muted">Fecha de Nacimiento</label>
-              <input type="date" name="birthdate" id="birthdate" value={formData.birthdate || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="date" name="birthdate" id="birthdate" value={formData.birthdate || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="sex" className="block text-sm font-medium text-muted">Sexo</label>
-              <select name="sex" id="sex" value={formData.sex || 'unknown'} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm">
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <select name="sex" id="sex" value={formData.sex || 'unknown'} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white">
                 <option value="unknown">No especificado</option>
                 <option value="male">Masculino</option>
                 <option value="female">Femenino</option>
@@ -146,11 +153,13 @@ function PatientProfileTab({ patient, onUpdate }: ProfileTabProps) {
             </div>
             <div>
               <label htmlFor="height_cm" className="block text-sm font-medium text-muted">Altura (cm)</label>
-              <input type="number" name="height_cm" id="height_cm" value={formData.height_cm || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="number" name="height_cm" id="height_cm" value={formData.height_cm || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
             <div>
               <label htmlFor="weight_kg" className="block text-sm font-medium text-muted">Peso (kg)</label>
-              <input type="number" name="weight_kg" id="weight_kg" value={formData.weight_kg || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm" />
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input type="number" name="weight_kg" id="weight_kg" value={formData.weight_kg || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white" />
             </div>
           </>
         ) : (
@@ -179,7 +188,6 @@ function PatientProfileTab({ patient, onUpdate }: ProfileTabProps) {
     </form>
   );
 }
-
 
 // ===================================================================
 // --- PESTAÑA 2: ALERTAS DEL PACIENTE ---
@@ -273,6 +281,7 @@ function PatientAlertsTab({ patientId }: AlertsTabProps) {
 
 // ===================================================================
 // --- PESTAÑA 3: UMBRALES (EDITABLE) ---
+// (REEMPLAZA ESTE COMPONENTE COMPLETO)
 // ===================================================================
 type ThresholdsTabProps = { patientId: number };
 
@@ -349,24 +358,26 @@ function PatientThresholdsTab({ patientId }: ThresholdsTabProps) {
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
               <label htmlFor={`${metric}_min`} className="block text-sm font-medium text-muted">Valor Mínimo</label>
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
               <input
                 type="number"
                 id={`${metric}_min`}
                 value={thresholds[metric]?.min_value || ''}
                 onChange={(e) => handleChange(metric, 'min_value', e.target.value)}
                 placeholder="Global"
-                className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+                className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
               />
             </div>
             <div>
               <label htmlFor={`${metric}_max`} className="block text-sm font-medium text-muted">Valor Máximo</label>
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
               <input
                 type="number"
                 id={`${metric}_max`}
                 value={thresholds[metric]?.max_value || ''}
                 onChange={(e) => handleChange(metric, 'max_value', e.target.value)}
                 placeholder="Global"
-                className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+                className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
               />
             </div>
           </div>

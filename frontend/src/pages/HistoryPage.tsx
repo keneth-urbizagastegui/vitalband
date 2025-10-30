@@ -127,24 +127,26 @@ export default function HistoryPage() {
       <form onSubmit={handleSubmit} className="p-4 bg-white rounded-xl border shadow-sm flex items-center gap-4">
         <div className="flex-1">
           <label htmlFor="from" className="block text-sm font-medium text-muted">Desde</label>
+          {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
           <input
             type="date"
             id="from"
             name="from"
             value={dateRange.from}
             onChange={handleDateChange}
-            className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-slate-400 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-white"
           />
         </div>
         <div className="flex-1">
           <label htmlFor="to" className="block text-sm font-medium text-muted">Hasta</label>
+          {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
           <input
             type="date"
             id="to"
             name="to"
             value={dateRange.to}
             onChange={handleDateChange}
-            className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-slate-400 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-white"
           />
         </div>
         <button

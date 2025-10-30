@@ -111,7 +111,8 @@ def get_patient_detail(patient_id: int):
 @admin_required()
 def update_patient(patient_id: int):
     """Actualiza la información de un paciente."""
-    if not _patients_service.get(patient_id): # Verifica existencia primero
+    # (Verifica existencia primero)
+    if not _patients_service.get(patient_id): 
         abort(404, description="Paciente no encontrado.")
 
     payload = request.get_json() or {}
@@ -120,23 +121,13 @@ def update_patient(patient_id: int):
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
-    # Necesitas un método update en PatientsService/Repository
-    # Ejemplo: updated_patient = _patients_service.update(patient_id, data)
-    # if not updated_patient:
-    #     abort(500, description="Error al actualizar el paciente.")
-    # return _patient_out.dump(updated_patient), 200
-    # --- Placeholder ---
-    print(f"TODO: Implementar PatientsService.update({patient_id}, {data})")
-    # Simulación temporal de lectura post-actualización (no guarda nada)
-    updated_patient = _patients_service.get(patient_id)
-    # Sobrescribe campos localmente para la respuesta (simulación)
-    if updated_patient:
-        for key, value in data.items():
-            if hasattr(updated_patient, key):
-                setattr(updated_patient, key, value)
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    updated_patient = _patients_service.update(patient_id, data)
+    if not updated_patient:
+        abort(500, description="Error al actualizar el paciente.")
+    
     return _patient_out.dump(updated_patient), 200
-    # --- Fin Placeholder ---
-
+    # --- FIN DEL CÓDIGO REAL ---
 
 @admin_bp.delete("/patients/<int:patient_id>")
 @admin_required()
@@ -145,16 +136,14 @@ def delete_patient(patient_id: int):
     if not _patients_service.get(patient_id):
         abort(404, description="Paciente no encontrado.")
 
-    # Necesitas un método delete en PatientsService/Repository
-    # Ejemplo: success = _patients_service.delete(patient_id)
-    # if not success:
-    #     abort(500, description="Error al eliminar el paciente.")
-    # return "", 204
-    # --- Placeholder ---
-    print(f"TODO: Implementar PatientsService.delete({patient_id})")
-    return "", 204 # Simula éxito No Content
-    # --- Fin Placeholder ---
-
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    success = _patients_service.delete(patient_id)
+    if not success:
+        abort(500, description="Error al eliminar el paciente.")
+    
+    return "", 204 # Éxito (No Content)
+    # --- FIN DEL CÓDIGO REAL ---
+    
 # ===========================
 # DISPOSITIVOS (CRUD + Asignación)
 # ===========================

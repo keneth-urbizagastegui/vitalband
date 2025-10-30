@@ -37,7 +37,7 @@ export default function RegisterPage() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!validate()) return;
@@ -46,14 +46,23 @@ export default function RegisterPage() {
 
     try {
       // Llama a la API de registro
-      // Nota: Esta API (como la definimos) crea el usuario Y lo loguea
-      // guardando el token y el usuario en localStorage.
-      await register({
+      const response = await register({
         name: name,
         email: email,
         password: password,
         confirm_password: confirmPassword
       });
+
+      // --- MODIFICACIÓN ---
+      // Guardamos manualmente el token y el usuario, ya que la API (endpoints.ts) ya no lo hace.
+      if (response.access_token && response.user) {
+        localStorage.setItem("token", response.access_token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+      } else {
+        throw new Error("El registro no devolvió un token o un usuario.");
+      }
+      // --- FIN MODIFICACIÓN ---
+
 
       // Si tiene éxito, redirige al dashboard.
       // ProtectedRoute verá el token en localStorage y permitirá el acceso.

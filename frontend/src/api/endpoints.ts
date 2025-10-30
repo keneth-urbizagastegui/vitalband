@@ -140,11 +140,19 @@ export async function login(email: string, password: string): Promise<{ token: s
 export async function register(userData: { name: string; email: string; password: string; confirm_password?: string }): Promise<{ message: string; user: User; access_token?: string }> {
   // El backend devuelve { message, user, access_token? }
   const { data } = await http.post("/auth/register", userData);
-  // Si hay token, loguear al usuario
+
+  // --- MODIFICACIÓN ---
+  // NO guardamos el token aquí.
+  // El componente que llama (RegisterPage) es responsable de guardarlo si es necesario.
+  // El componente AdminPatientCreatePage NO debe guardarlo.
+  /*
   if (data?.access_token && data?.user) {
       localStorage.setItem(TOKEN_KEY, data.access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
   }
+  */
+  // --- FIN MODIFICACIÓN ---
+
   return data;
 }
 
