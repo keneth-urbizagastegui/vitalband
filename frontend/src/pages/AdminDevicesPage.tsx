@@ -23,7 +23,7 @@ const formatDeviceStatus = (status: Device['status']): string => {
 
 // ===================================================================
 // --- Componente del Modal de Asignación ---
-// (Lo ponemos en el mismo archivo por simplicidad)
+// (REEMPLAZA ESTE COMPONENTE COMPLETO)
 // ===================================================================
 type AssignModalProps = {
   device: Device;
@@ -71,11 +71,12 @@ function AssignDeviceModal({ device, patients, onClose, onSave }: AssignModalPro
               <label htmlFor="patient" className="block text-sm font-medium text-muted">
                 Seleccionar Paciente
               </label>
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
               <select
                 id="patient"
                 value={selectedPatientId}
                 onChange={(e) => setSelectedPatientId(e.target.value)}
-                className="mt-1 block w-full rounded-md border-slate-300 shadow-sm sm:text-sm"
+                className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
               >
                 {/* Opción para des-asignar */}
                 <option value="">-- No Asignado --</option>
@@ -112,7 +113,6 @@ function AssignDeviceModal({ device, patients, onClose, onSave }: AssignModalPro
     </div>
   );
 }
-
 
 // ===================================================================
 // --- Componente Principal de la Página ---

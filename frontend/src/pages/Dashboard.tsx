@@ -159,17 +159,25 @@ export default function Dashboard() {
         )}
 
         {/* Puedes añadir más gráficos aquí para SpO2 y Temperatura si lo deseas */}
-        {/*
         {historyData.length > 0 && (
-           <LineChartCard
-             title="Saturación de Oxígeno (Últimas 24h)"
-             data={chartData}
-             xKey="time"
-             yKey="spo2"
-             height={250} // Un poco más bajo quizás
-           />
+          <LineChartCard
+            title="Saturación de Oxígeno (Últimas 24h)"
+            data={chartData}
+            xKey="time"
+            yKey="spo2"
+            height={250} // Un poco más bajo quizás
+          />
         )}
-        */}
+
+        {historyData.length > 0 && (
+          <LineChartCard
+            title="Temperatura Corporal (Últimas 24h)"
+            data={chartData}
+            xKey="time"
+            yKey="temp"
+            height={250} 
+          />
+        )}
       </main>
   );
 }

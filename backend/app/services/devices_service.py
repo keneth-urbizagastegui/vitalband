@@ -47,7 +47,9 @@ class DevicesService:
              # Lanza una excepción específica o un ValueError
              raise ValueError(f"Ya existe un dispositivo con el serial {serial}.")
         try:
+            # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
             return self.repo.create(serial=serial, model=model, status=status, patient_id=patient_id)
+            # --- FIN DEL CÓDIGO REAL ---
         except Exception as e:
             logger.error(f"Error en repositorio al crear dispositivo (serial: {serial}): {e}")
             raise e
@@ -55,15 +57,10 @@ class DevicesService:
     # --- NUEVO: Listar todos los dispositivos (para admin) ---
     def list_all(self, page: int = 1, per_page: int = 100) -> List[Device]: # Añade paginación básica
         """Lista todos los dispositivos registrados."""
-        # Necesitas añadir `list_all` (con paginación opcional) al DevicesRepository
         try:
-            # return self.repo.list_all(page=page, per_page=per_page)
-            # --- Placeholder ---
-            logger.debug(f"TODO: Implementar DevicesRepository.list_all(page={page}, per_page={per_page})")
-            # Simula devolver una lista (podrías leer algunos de la BD para pruebas)
-            # Ejemplo simple: devuelve los de un paciente específico por ahora
-            return self.repo.list_by_patient(1) if page==1 else []
-            # --- Fin Placeholder ---
+            # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+            return self.repo.list_all(page=page, per_page=per_page)
+            # --- FIN DEL CÓDIGO REAL ---
         except Exception as e:
             logger.error(f"Error al listar todos los dispositivos: {e}")
             return []
@@ -112,48 +109,34 @@ class DevicesService:
              raise e # Relanza
 
     # --- NUEVO: Actualizar dispositivo ---
-    def update(self, device_id: int, data: Dict[str, Any]) -> Optional[Device]:
+    def update(self, device: Device, data: Dict[str, Any]) -> Optional[Device]: # Recibe el objeto
         """Actualiza datos de un dispositivo (ej. status, model)."""
-        device = self.repo.get_by_id(device_id)
+        # El controlador ya verificó que el dispositivo existe
         if not device:
             return None
 
-        # Necesitas añadir `update` al DevicesRepository
         try:
-            # return self.repo.update(device, data) # El repo aplica cambios y hace commit
-            # --- Placeholder ---
-            logger.debug(f"TODO: Implementar DevicesRepository.update({device_id}, {data})")
-            # Simula actualización local
-            allowed_fields = ["model", "status"] # Campos que el admin puede modificar
-            for key, value in data.items():
-                if key in allowed_fields and hasattr(device, key):
-                    setattr(device, key, value)
-            # ¡Falta commit en repo!
-            return device
-            # --- Fin Placeholder ---
+            # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+            return self.repo.update(device, data) # El repo aplica cambios y hace commit
+            # --- FIN DEL CÓDIGO REAL ---
         except Exception as e:
-             logger.error(f"Error al actualizar dispositivo {device_id}: {e}")
+             logger.error(f"Error al actualizar dispositivo {device.id}: {e}")
              db.session.rollback()
              return None # O relanza
 
-    # --- NUEVO: Eliminar dispositivo ---
-    def delete(self, device_id: int) -> bool:
+# --- NUEVO: Eliminar dispositivo ---
+    def delete(self, device: Device) -> bool: # Recibe el objeto
         """Elimina un dispositivo."""
-        device = self.repo.get_by_id(device_id)
+        # El controlador ya verificó que el dispositivo existe
         if not device:
             return False
 
-        # Necesitas añadir `delete` al DevicesRepository
-        # Considera las implicaciones (CASCADE definido en el modelo borrará readings/telemetry)
         try:
-            # return self.repo.delete(device) # El repo hace delete y commit
-             # --- Placeholder ---
-            logger.debug(f"TODO: Implementar DevicesRepository.delete({device_id})")
-            # ¡Falta delete y commit en repo!
-            return True # Simula éxito
-            # --- Fin Placeholder ---
+            # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+            return self.repo.delete(device) # El repo hace delete y commit
+            # --- FIN DEL CÓDIGO REAL ---
         except Exception as e:
-            logger.error(f"Error al eliminar dispositivo {device_id}: {e}")
+            logger.error(f"Error al eliminar dispositivo {device.id}: {e}")
             db.session.rollback()
             return False
 

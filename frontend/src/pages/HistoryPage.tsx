@@ -59,16 +59,18 @@ export default function HistoryPage() {
       // El input da "YYYY-MM-DD", lo cual se interpreta como medianoche (00:00) UTC.
       // Para asegurar que incluimos todo el día 'to', ajustamos la hora.
       
-      const fromDate = new Date(dateRange.from);
-      fromDate.setHours(0, 0, 0, 0); // Inicio del día 'from'
+      // --- MODIFICACIÓN: Añadir T00:00:00 para asegurar que se parsee como hora local ---
+      const fromDate = new Date(`${dateRange.from}T00:00:00`);
+      fromDate.setHours(0, 0, 0, 0); // Inicio del día 'from' (en hora local)
       
-      const toDate = new Date(dateRange.to);
-      toDate.setHours(23, 59, 59, 999); // Final del día 'to'
+      const toDate = new Date(`${dateRange.to}T00:00:00`);
+      toDate.setHours(23, 59, 59, 999); // Final del día 'to' (en hora local)
+      // --- FIN DE LA MODIFICACIÓN ---
 
       const params = {
-        from: fromDate.toISOString(),
-        to: toDate.toISOString(),
-        limit: 1000 // Aumentamos el límite para rangos de fecha largos
+        from: fromDate.toISOString(), // Convierte a UTC para la API
+        to: toDate.toISOString(),   // Convierte a UTC para la API
+        limit: 1000 
       };
       
       const data = await getMyReadingsHistory(params);

@@ -300,6 +300,12 @@ export async function acknowledgeAlertAdmin(alertId: number, notes?: string): Pr
   return data;
 }
 
+// NUEVO: Listar todas las alertas pendientes para el dashboard de admin
+export async function listPendingAlertsAdmin(params?: { limit?: number }): Promise<Alert[]> {
+  const { data } = await http.get<ListResponse<Alert>>("/admin/alerts/pending", { params });
+  return data?.items ?? [];
+}
+
 // --- Admin: Umbrales ---
 
 export async function getGlobalThresholdsAdmin(): Promise<Threshold[]> {

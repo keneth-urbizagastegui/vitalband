@@ -143,7 +143,7 @@ def delete_patient(patient_id: int):
     
     return "", 204 # Éxito (No Content)
     # --- FIN DEL CÓDIGO REAL ---
-    
+
 # ===========================
 # DISPOSITIVOS (CRUD + Asignación)
 # ===========================
@@ -158,31 +158,25 @@ def register_device():
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
-    # El servicio maneja la lógica de 'crear si no existe' por serial
-    # Nota: Aquí no se asigna a paciente, solo se registra.
     try:
-        # Necesitas un método `create` o `register` en DevicesService
-        # device = _devices_service.create(**data)
-        # return _device_out.dump(device), 201
-        # --- Placeholder ---
-        print(f"TODO: Implementar DevicesService.create({data})")
-        # Simula creación exitosa devolviendo datos de entrada + ID ficticio
-        return {"id": 999, **data, "status": "new", "patient_id": None}, 201
-        # --- Fin Placeholder ---
-    except Exception as e: # Podría fallar si el serial ya existe y no usas upsert
-        abort(409, description=f"Conflicto al registrar dispositivo. ¿Serial duplicado? ({e})")
+        # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+        device = _devices_service.create(**data)
+        return _device_out.dump(device), 201
+        # --- FIN DEL CÓDIGO REAL ---
+    except ValueError as e: # Captura el error de serial duplicado del servicio
+         abort(409, description=str(e))
+    except Exception as e: 
+        abort(500, description=f"Error interno al registrar dispositivo: {e}")
 
 @admin_bp.get("/devices")
 @admin_required()
 def list_devices_admin():
     """Lista todos los dispositivos registrados."""
-    # Necesitas un método `list_all` en DevicesService/Repository
-    # devices = _devices_service.list_all()
-    # return {"items": _device_out_many.dump(devices)}, 200
-    # --- Placeholder ---
-    print("TODO: Implementar DevicesService.list_all()")
-    return {"items": []}, 200
-    # --- Fin Placeholder ---
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    # TODO: Añadir paginación si es necesario
+    devices = _devices_service.list_all()
+    return {"items": _device_out_many.dump(devices)}, 200
+    # --- FIN DEL CÓDIGO REAL ---
 
 @admin_bp.get("/devices/<int:device_id>")
 @admin_required()
@@ -197,7 +191,8 @@ def get_device_detail(device_id: int):
 @admin_required()
 def update_device(device_id: int):
     """Actualiza información del dispositivo (ej. estado, modelo)."""
-    if not _devices_service.get_by_id(device_id):
+    device = _devices_service.get_by_id(device_id) # Se necesita el objeto
+    if not device:
         abort(404, description="Dispositivo no encontrado.")
 
     payload = request.get_json() or {}
@@ -206,19 +201,12 @@ def update_device(device_id: int):
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
-    # Necesitas un método `update` en DevicesService/Repository
-    # updated_device = _devices_service.update(device_id, data)
-    # if not updated_device:
-    #     abort(500, "Error al actualizar dispositivo.")
-    # return _device_out.dump(updated_device), 200
-    # --- Placeholder ---
-    print(f"TODO: Implementar DevicesService.update({device_id}, {data})")
-    updated_device = _devices_service.get_by_id(device_id) # Lee de nuevo
-    if updated_device: # Simula actualización local para respuesta
-        for key, value in data.items():
-            if hasattr(updated_device, key): setattr(updated_device, key, value)
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    updated_device = _devices_service.update(device, data)
+    if not updated_device:
+         abort(500, "Error al actualizar dispositivo.")
     return _device_out.dump(updated_device), 200
-    # --- Fin Placeholder ---
+    # --- FIN DEL CÓDIGO REAL ---
 
 @admin_bp.post("/devices/<int:device_id>/assign")
 @admin_required()
@@ -246,19 +234,16 @@ def assign_device_to_patient(device_id: int):
 @admin_required()
 def delete_device(device_id: int):
     """Elimina un dispositivo (¡cuidado con los datos asociados!)."""
-    if not _devices_service.get_by_id(device_id):
+    device = _devices_service.get_by_id(device_id) # Necesitamos el objeto
+    if not device:
         abort(404, description="Dispositivo no encontrado.")
 
-    # Necesitas un método `delete` en DevicesService/Repository
-    # Considera las implicaciones: ¿borrar lecturas/telemetría (CASCADE)? ¿O solo marcar como 'retired'?
-    # success = _devices_service.delete(device_id)
-    # if not success:
-    #     abort(500, description="Error al eliminar el dispositivo.")
-    # return "", 204
-    # --- Placeholder ---
-    print(f"TODO: Implementar DevicesService.delete({device_id}) - ¡Considerar consecuencias!")
-    return "", 204 # Simula éxito No Content
-    # --- Fin Placeholder ---
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    success = _devices_service.delete(device)
+    if not success:
+        abort(500, description="Error al eliminar el dispositivo.")
+    return "", 204
+    # --- FIN DEL CÓDIGO REAL ---
 
 # ===========================
 # ALERTAS (Gestión)
@@ -296,26 +281,27 @@ def get_alert_detail(alert_id: int):
 @admin_required()
 def acknowledge_alert(alert_id: int):
     """Marca una alerta como reconocida por el admin actual."""
-    user_id = get_jwt()["sub"] # Obtiene el ID del admin desde el token
+    user_id_str = get_jwt_identity() # Obtiene el ID del admin (como string)
+    user_id = int(user_id_str) # Convierte a int para el servicio
 
     payload = request.get_json() or {}
     try:
-        # Podrías tener un schema para notas opcionales al reconocer
-        data = _alert_ack_in.load(payload) # Asume que puede estar vacío o tener { "notes": "..." }
+        data = _alert_ack_in.load(payload) 
     except ValidationError as err:
         return {"messages": err.messages}, 400
 
-    # Necesitas un método `acknowledge` en AlertsService/Repository
-    # updated_alert = _alerts_service.acknowledge(alert_id, user_id, data.get("notes"))
-    # if not updated_alert:
-    #     abort(404, description="Alerta no encontrada o ya reconocida.") # O 409 Conflict
-    # return _alert_out.dump(updated_alert), 200
-    # --- Placeholder ---
-    print(f"TODO: Implementar AlertsService.acknowledge({alert_id}, user_id={user_id}, notes={payload.get('notes')})")
-    # Simula éxito devolviendo detalle placeholder
-    return {"id": alert_id, "message": "Placeholder", "acknowledged_by": user_id, "acknowledged_at": "now"}, 200
-    # --- Fin Placeholder ---
-
+    # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+    updated_alert = _alerts_service.acknowledge(
+        alert_id, 
+        user_id, 
+        data.get("notes") # Pasa las notas (aunque el modelo actual no las use)
+    )
+    
+    if not updated_alert:
+        abort(404, description="Alerta no encontrada o ya reconocida.") 
+    
+    return _alert_out.dump(updated_alert), 200
+    # --- FIN DEL CÓDIGO REAL ---
 
 # ===========================
 # UMBRALES (Thresholds)
@@ -391,6 +377,21 @@ def set_patient_threshold(patient_id: int, metric: str):
         max_value=data.get("max_value")
     )
     return _threshold_out.dump(threshold), 200
+
+# ===========================
+# ALERTAS (Gestión Global)
+# ===========================
+
+@admin_bp.get("/alerts/pending")
+@admin_required()
+def get_pending_alerts():
+    """Obtiene una lista de todas las alertas pendientes (no reconocidas) del sistema."""
+    limit = request.args.get("limit", default=20, type=int)
+    
+    # Llama al nuevo método del servicio
+    alerts = _alerts_service.list_pending_alerts(limit=limit)
+    
+    return {"items": _alert_out_many.dump(alerts)}, 200
 
 # ===========================
 # ESTADÍSTICAS (Opcional)

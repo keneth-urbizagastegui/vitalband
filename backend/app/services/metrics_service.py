@@ -34,15 +34,10 @@ class MetricsService:
     # --- NUEVO: Obtener la última lectura ---
     def get_latest_reading(self, device_id: int) -> Optional[Reading]:
         """Obtiene la lectura más reciente registrada para un dispositivo."""
-        # Necesitas añadir `get_latest` al MetricsRepository
         try:
-            # return self.repo.get_latest(device_id) # Descomenta cuando lo implementes
-            # --- Placeholder ---
-            logger.debug(f"TODO: Implementar MetricsRepository.get_latest({device_id})")
-            # Simula obtener la última lectura de las últimas 24h si hay alguna
-            latest_list = self.repo.last_24h(device_id) # Usa un método existente temporalmente
-            return latest_list[0] if latest_list else None
-            # --- Fin Placeholder ---
+            # --- INICIO DEL CÓDIGO REAL (REEMPLAZA EL PLACEHOLDER) ---
+            return self.repo.get_latest(device_id) # Llama al método correcto del repo
+            # --- FIN DEL CÓDIGO REAL ---
         except Exception as e:
             logger.error(f"Error al obtener la última lectura para device {device_id}: {e}")
             return None
