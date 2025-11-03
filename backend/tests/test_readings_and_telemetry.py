@@ -1,9 +1,9 @@
 import os
 import time
 
-def test_readings_alias_last24h(client):
+def test_readings_alias_last24h(client, auth_headers):
     # alias /metrics/... mantiene compatibilidad
-    res = client.get("/api/v1/metrics/1/last24h")
+    res = client.get("/api/v1/metrics/1/last24h", headers=auth_headers)
     assert res.status_code == 200
     assert "items" in res.get_json()
 

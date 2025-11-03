@@ -1,5 +1,5 @@
-def test_list_patients(client):
-    res = client.get("/api/v1/patients")
+def test_list_patients(client, auth_headers):
+    res = client.get("/api/v1/patients", headers=auth_headers)
     assert res.status_code == 200
     data = res.get_json()
     assert "items" in data

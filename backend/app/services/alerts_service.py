@@ -66,6 +66,15 @@ class AlertsService:
             logger.error(f"Error al listar alertas pendientes: {e}")
             return []
 
+    # --- NUEVO: Listar alertas pendientes por paciente ---
+    def list_pending_for_patient(self, patient_id: int, limit: int = 5) -> List[Alert]:
+        """Lista las alertas pendientes (no reconocidas) para un paciente específico."""
+        try:
+            return self.repo.list_pending_for_patient(patient_id, limit=limit)
+        except Exception as e:
+            logger.error(f"Error al listar alertas pendientes para paciente {patient_id}: {e}")
+            return []
+
     # --- NUEVO (Opcional): Contar alertas ---
     # def count_recent_by_severity(self, hours: int = 24) -> Dict[str, int]:
     #     """Cuenta alertas recientes agrupadas por severidad."""

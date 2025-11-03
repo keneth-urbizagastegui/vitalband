@@ -82,6 +82,9 @@ export default function ClientLayout() {
               <li>
                 <NavItem to="/profile">Mi Perfil</NavItem>
               </li>
+              <li>
+                <NavItem to="/chatbot">Asistente IA</NavItem>
+              </li>
             </ul>
           </nav>
         </div>

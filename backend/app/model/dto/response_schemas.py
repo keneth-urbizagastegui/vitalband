@@ -73,7 +73,7 @@ class DeviceTelemetryResponse(Schema):
 # --- NUEVO: Threshold Response ---
 class ThresholdResponse(Schema):
     """Schema para un umbral (límite para alertas)."""
-    id = fields.Integer(required=True)
+    id = fields.Integer(required=True, allow_none=True)
     patient_id = fields.Integer(allow_none=True) # Null si es global
     metric = fields.String(required=True) # 'heart_rate', 'temperature', 'spo2'
     min_value = fields.Decimal(as_string=True, allow_none=True)

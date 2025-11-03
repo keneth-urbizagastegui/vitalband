@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import HistoryPage from "./pages/HistoryPage";
 import AlertsPage from "./pages/AlertsPage";
 import ProfilePage from "./pages/ProfilePage";
+import ChatbotPage from "./pages/ChatbotPage";
 
 // --- PÁGINAS DE ADMIN (COMPLETAS) ---
 import AdminPanel from "./pages/AdminPanel";
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/chatbot" element={<ChatbotPage />} />
         </Route>
 
         {/* 2. Portal de Admin (con Layout) */}

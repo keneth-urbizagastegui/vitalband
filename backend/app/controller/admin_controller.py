@@ -2,7 +2,7 @@
 
 from functools import wraps
 from flask import Blueprint, request, abort, jsonify
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from marshmallow import ValidationError
 
 # --- Servicios ---
@@ -23,7 +23,7 @@ from ..model.dto.response_schemas import (
     PatientResponse, DeviceResponse, AlertResponse, ThresholdResponse # Asume que existen
 )
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin") # Prefijo /admin ya aquí
+admin_bp = Blueprint("admin", __name__) # Prefijo manejado en app/__init__.py
 
 # --- Instancias de Servicios ---
 _patients_service = PatientsService()
@@ -265,16 +265,10 @@ def list_alerts_for_patient(patient_id: int):
 @admin_required()
 def get_alert_detail(alert_id: int):
      """Obtiene detalle de una alerta específica."""
-     # Necesitas un método `get` en AlertsService/Repository
-     # alert = _alerts_service.get(alert_id)
-     # if not alert:
-     #     abort(404, description="Alerta no encontrada.")
-     # return _alert_out.dump(alert), 200
-     # --- Placeholder ---
-     print(f"TODO: Implementar AlertsService.get({alert_id})")
-     # Simula encontrar una alerta
-     return {"id": alert_id, "message": "Placeholder alert"}, 200
-     # --- Fin Placeholder ---
+     alert = _alerts_service.get(alert_id)
+     if not alert:
+         abort(404, description="Alerta no encontrada.")
+     return _alert_out.dump(alert), 200
 
 
 @admin_bp.post("/alerts/<int:alert_id>/acknowledge")
@@ -315,9 +309,8 @@ def get_global_thresholds():
     thresholds = [_thresholds_service.get_thresholds(patient_id=None, metric=m) for m in metrics]
     # Filtra los que no tengan min/max definidos si quieres solo los existentes
     # existing_thresholds = [t for t in thresholds if t.get('min') is not None or t.get('max') is not None]
-    # Necesitas un schema _threshold_out_many
-    # return {"items": _threshold_out_many.dump(thresholds)}, 200 # Usa el schema adecuado
-    return {"items": thresholds}, 200 # Respuesta directa mientras creas schema
+    # Serializa usando el schema adecuado
+    return {"items": _threshold_out_many.dump(thresholds)}, 200
 
 @admin_bp.put("/thresholds/global/<string:metric>")
 @admin_required()
@@ -352,8 +345,8 @@ def get_patient_thresholds(patient_id: int):
     metrics = ["heart_rate", "temperature", "spo2"]
     # El servicio ya debería manejar la lógica de fallback a global si no hay específico
     thresholds = [_thresholds_service.get_thresholds(patient_id=patient_id, metric=m) for m in metrics]
-    # return {"items": _threshold_out_many.dump(thresholds)}, 200 # Usa el schema adecuado
-    return {"items": thresholds}, 200
+    # Serializa usando el schema adecuado
+    return {"items": _threshold_out_many.dump(thresholds)}, 200
 
 @admin_bp.put("/patients/<int:patient_id>/thresholds/<string:metric>")
 @admin_required()

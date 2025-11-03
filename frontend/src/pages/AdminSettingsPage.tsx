@@ -1,7 +1,7 @@
 // frontend/src/pages/AdminSettingsPage.tsx
 import { useEffect, useState } from "react";
 import { getGlobalThresholdsAdmin, setGlobalThresholdAdmin } from "../api/endpoints";
-import type { ThresholdUpdateData } from "../api/endpoints";
+import type { ThresholdUpdateData, Threshold } from "../api/endpoints";
 
 // Define the shape of our form state
 type ThresholdsState = {
@@ -21,6 +21,13 @@ export default function AdminSettingsPage() {
     spo2: { min_value: null, max_value: null },
   });
 
+  // Track threshold ids per metric to show context text
+  const [thresholdIds, setThresholdIds] = useState<Record<keyof ThresholdsState, number | null>>({
+    heart_rate: null,
+    temperature: null,
+    spo2: null,
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Separate saving state for each form
@@ -36,19 +43,22 @@ export default function AdminSettingsPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getGlobalThresholdsAdmin();
+        const data: Threshold[] = await getGlobalThresholdsAdmin();
         
         // Transform the array response into our state object
         const newThresholdsState = { ...thresholds };
+        const newThresholdIds: Record<keyof ThresholdsState, number | null> = { ...thresholdIds } as any;
         data.forEach(t => {
           if (t.metric in newThresholdsState) {
             newThresholdsState[t.metric as keyof ThresholdsState] = {
               min_value: t.min_value,
               max_value: t.max_value,
             };
+            newThresholdIds[t.metric as keyof ThresholdsState] = t.id ?? null;
           }
         });
         setThresholds(newThresholdsState);
+        setThresholdIds(newThresholdIds);
 
       } catch (err: any) {
         console.error("Error fetching thresholds:", err);
@@ -129,38 +139,43 @@ export default function AdminSettingsPage() {
               {formatMetricName(metric)}
             </h2>
             
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Min Value Input */}
-              <div>
-                <label htmlFor={`${metric}_min`} className="block text-sm font-medium text-muted">Valor Mínimo</label>
-                {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
-                <input
-                  type="number"
-                  step="0.1"
-                  id={`${metric}_min`}
-                  name="min_value"
-                  value={thresholds[metric]?.min_value || ''}
-                  onChange={(e) => handleChange(metric, 'min_value', e.target.value)}
-                  placeholder="Ej: 50"
-                  className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
-                />
-              </div>
-              {/* Max Value Input */}
-              <div>
-                <label htmlFor={`${metric}_max`} className="block text-sm font-medium text-muted">Valor Máximo</label>
-                {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
-                <input
-                  type="number"
-                  step="0.1"
-                  id={`${metric}_max`}
-                  name="max_value"
-                  value={thresholds[metric]?.max_value || ''}
-                  onChange={(e) => handleChange(metric, 'max_value', e.target.value)}
-                  placeholder="Ej: 120"
-                  className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
-                />
-              </div>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Min Value Input */}
+            <div>
+              <label htmlFor={`${metric}_min`} className="block text-sm font-medium text-muted">Valor Mínimo</label>
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input
+                type="number"
+                step="0.1"
+                id={`${metric}_min`}
+                name="min_value"
+                value={thresholds[metric]?.min_value || ''}
+                onChange={(e) => handleChange(metric, 'min_value', e.target.value)}
+                placeholder="Ej: 50"
+                className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
+              />
             </div>
+            {/* Max Value Input */}
+            <div>
+              <label htmlFor={`${metric}_max`} className="block text-sm font-medium text-muted">Valor Máximo</label>
+              {/* MODIFICACIÓN: Añadido bg-white y cambiado border-slate-400 */}
+              <input
+                type="number"
+                step="0.1"
+                id={`${metric}_max`}
+                name="max_value"
+                value={thresholds[metric]?.max_value || ''}
+                onChange={(e) => handleChange(metric, 'max_value', e.target.value)}
+                placeholder="Ej: 120"
+                className="mt-1 block w-full rounded-md border-slate-400 shadow-sm sm:text-sm bg-white"
+              />
+            </div>
+          </div>
+
+            {/* Context text based on whether threshold is persisted or default */}
+            <p className="text-xs text-muted mt-1">
+              {thresholdIds[metric] == null ? "Usando valor por defecto del sistema." : "Usando valor guardado."}
+            </p>
 
             {/* Save Button */}
             <div className="mt-6 pt-4 border-t flex justify-end">

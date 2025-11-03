@@ -287,6 +287,12 @@ type ThresholdsTabProps = { patientId: number };
 
 function PatientThresholdsTab({ patientId }: ThresholdsTabProps) {
   const [thresholds, setThresholds] = useState<Record<string, ThresholdUpdateData>>({});
+  // Track ids for each metric to display context
+  const [thresholdIds, setThresholdIds] = useState<Record<string, number | null>>({
+    heart_rate: null,
+    temperature: null,
+    spo2: null,
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -304,10 +310,17 @@ function PatientThresholdsTab({ patientId }: ThresholdsTabProps) {
           temperature: {},
           spo2: {},
         };
+        const idMap: Record<string, number | null> = {
+          heart_rate: null,
+          temperature: null,
+          spo2: null,
+        };
         data.forEach(t => {
           thresholdMap[t.metric] = { min_value: t.min_value, max_value: t.max_value };
+          idMap[t.metric] = t.id ?? null;
         });
         setThresholds(thresholdMap);
+        setThresholdIds(idMap);
       } catch (err) {
         setError("No se pudieron cargar los umbrales.");
       } finally {
@@ -381,6 +394,10 @@ function PatientThresholdsTab({ patientId }: ThresholdsTabProps) {
               />
             </div>
           </div>
+          {/* Context text for this metric based on whether the threshold is persisted */}
+          <p className="text-xs text-muted mt-1">
+            {thresholdIds[metric] == null ? "Usando valor por defecto del sistema." : "Usando valor guardado."}
+          </p>
           <button type="submit" disabled={saving} className="mt-4 px-4 py-1.5 text-sm bg-primary-600 text-white rounded-md shadow-sm hover:bg-primary-700 disabled:bg-slate-400">
             {saving ? "Guardando..." : "Guardar Umbral"}
           </button>

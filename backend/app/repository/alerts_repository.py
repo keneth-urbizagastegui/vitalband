@@ -46,6 +46,21 @@ class AlertsRepository:
                 .limit(limit)
                 .all())
 
+    # --- NUEVO: Listar alertas pendientes por paciente ---
+    @staticmethod
+    def list_pending_for_patient(patient_id: int, limit: int = 5) -> List[Alert]:
+        """Obtiene las alertas pendientes (no reconocidas) para un paciente específico."""
+        return (
+            Alert.query
+            .filter(
+                Alert.patient_id == patient_id,
+                Alert.acknowledged_at.is_(None)
+            )
+            .order_by(Alert.ts.desc())
+            .limit(limit)
+            .all()
+        )
+
     # --- Opcional: Métodos para estadísticas (ej. contar por severidad) ---
     @staticmethod
     def count_recent_by_severity(hours: int = 24) -> Dict[str, int]:

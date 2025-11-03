@@ -68,7 +68,7 @@ export type Alert = {
   acknowledged_at: string | null; // ISO 8601
 };
 export type Threshold = {
-  id: number;
+  id: number | null;
   patient_id: number | null; // Null si es global
   metric: "heart_rate" | "temperature" | "spo2";
   min_value: string | null; // Viene como string (Decimal)

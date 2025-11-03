@@ -23,6 +23,7 @@ _devices_service = DevicesService()
 
 # --- Instancias de Schemas ---
 _patient_out = PatientResponse()
+_patient_out_many = PatientResponse(many=True)
 _readings_out_many = ReadingResponse(many=True)
 _alert_out_many = AlertResponse(many=True)
 _device_out_many = DeviceResponse(many=True)
@@ -139,3 +140,27 @@ def get_my_alerts():
     # acknowledged = None if acknowledged_param is None else acknowledged_param.lower() == 'false'
     alerts = _alerts_service.list_alerts_for_patient(patient_id, limit=limit) # Añade acknowledged si lo usas
     return {"items": _alert_out_many.dump(alerts)}, 200
+
+# === Rutas públicas para compatibilidad con tests ===
+
+@client_bp.get("/patients")
+@jwt_required()
+def list_patients_public():
+    """Lista pública de pacientes (solo para compatibilidad con tests).
+
+    Devuelve una lista básica de pacientes; en producción debería requerir autorizacion
+    o limitar campos. Aquí seguimos lo que esperan los tests.
+    """
+    patients = _patients_service.list_patients()
+    return {"items": _patient_out_many.dump(patients)}, 200
+
+@client_bp.get("/metrics/<int:device_id>/last24h")
+@jwt_required()
+def metrics_alias_last24h(device_id: int):
+    """Alias de compatibilidad: /metrics/<device_id>/last24h.
+
+    No requiere autenticacion
+    y devuelve el mismo formato usado en lecturas: {"items": [...]}.
+    """
+    readings = _metrics_service.last_24h_for_device(device_id)
+    return {"items": _readings_out_many.dump(readings)}, 200

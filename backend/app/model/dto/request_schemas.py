@@ -1,6 +1,7 @@
 # backend/app/model/dto/request_schemas.py
 
-from marshmallow import Schema, fields, validate, validates, ValidationError
+import os
+from marshmallow import Schema, fields, validate, validates, ValidationError, pre_load
 
 # --- Helper de Validación para Password (ejemplo) ---
 def validate_password(password):
@@ -194,7 +195,28 @@ class AlertAcknowledgeRequest(Schema):
 
 
 # ---------- Chatbot ----------
+# Configurable: longitud máxima de entrada del chatbot (por entorno)
+CHATBOT_MAX_INPUT_LEN = int(os.getenv('CHATBOT_MAX_INPUT_LEN', 1000))
+
 # --- NUEVO: Chatbot Query Request ---
 class ChatbotQueryRequest(Schema):
     """Schema para validar la consulta enviada al chatbot."""
-    message = fields.String(required=True, validate=validate.Length(min=1, max=1000)) # Limita longitud
+    message = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=CHATBOT_MAX_INPUT_LEN,
+            error=f"El mensaje no puede estar vacío o tener más de {CHATBOT_MAX_INPUT_LEN} caracteres."
+        )
+    ) # Limita longitud
+
+    @pre_load
+    def strip_message(self, data, **kwargs):
+        """Elimina espacios en el campo 'message' antes de validar.
+        Si después del strip queda vacío, la validación Length(min=1) lo rechazará.
+        """
+        if isinstance(data, dict):
+            msg = data.get("message")
+            if isinstance(msg, str):
+                data["message"] = msg.strip()
+        return data
