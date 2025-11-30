@@ -1,6 +1,6 @@
 // frontend/src/pages/RegisterPage.tsx
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { register } from "../api/endpoints"; // Importa tu función de API
 import logo from "../assets/logo.png";
 
@@ -13,7 +13,6 @@ export default function RegisterPage() {
   
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   // Validaciones simples
   const validate = () => {

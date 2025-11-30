@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getMyAlerts } from "../api/endpoints";
-import type { Alert, Role } from "../api/endpoints"; // Importamos 'Alert'
+import type { Alert } from "../api/endpoints";
 
 // --- Helpers de formato (puedes moverlos a un archivo utils.ts) ---
 

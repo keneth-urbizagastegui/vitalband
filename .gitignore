@@ -29,6 +29,10 @@ frontend/.vite/
 backend/instance/
 backend/migrations/versions/__pycache__/
 
+# Hardware secrets
+HARDWARE/credentials.h
+hardware/firmware/credentials.h
+
 # IDEs
 .vscode/
 .idea/

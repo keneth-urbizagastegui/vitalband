@@ -126,10 +126,6 @@ export async function login(email: string, password: string): Promise<{ token: s
     throw new Error("Respuesta de login inválida del servidor.");
   }
 
-  // --- LÍNEA AÑADIDA PARA EL PASO 2 ---
-  console.log(`PASO 2 (Endpoints): Token recibido del backend y a punto de guardar: ${token}`);
-  // --- FIN DE LÍNEA AÑADIDA ---
-
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   return { token, user };

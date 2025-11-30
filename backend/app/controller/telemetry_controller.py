@@ -37,43 +37,34 @@ def _parse_dt(s: str | None) -> datetime | None:
 # === Helper para verificar permisos de acceso a telemetría ===
 def _check_telemetry_permission(device_id: int, required_level: str = "read"):
     """Verifica si el usuario/token actual tiene permiso para acceder a la telemetría."""
-    user_id = get_jwt_identity()
+    user_id_str = get_jwt_identity()
     claims = get_jwt()
     role = claims.get("role")
 
-    # Política: Admin puede leer/escribir todo. Cliente solo puede leer de sus dispositivos.
-    #           Para POST (escritura), se necesita una política más clara (¿token de dispositivo?).
-
     if role == "admin":
-        return # Admin tiene acceso total
+        return
 
     if role == "client":
         if required_level == "write":
-             abort(403, description="Clientes no pueden escribir telemetría.")
+            abort(403, description="Clientes no pueden escribir telemetría.")
 
-        # Verificar si el device_id pertenece al cliente
-        # patient = _patients_service.get_by_user_id(user_id)
-        # if not patient: abort(404, "Perfil no encontrado.")
-        # device = _devices_service.get_patient_device(patient.id, device_id) # Necesitas este método
-        # if not device:
-        #     abort(403, description="Acceso denegado a la telemetría de este dispositivo.")
-        # --- Placeholder de verificación de pertenencia ---
-        print(f"TODO: Verificar que device_id {device_id} pertenece al client user_id {user_id}")
-        # Simula que user 1 es dueño de device 1
-        if user_id == 1 and device_id == 1:
-            return
-        abort(403, description="Acceso denegado a la telemetría de este dispositivo (Placeholder check).")
-        # --- Fin Placeholder ---
+        try:
+            user_id = int(user_id_str) if isinstance(user_id_str, str) else user_id_str
+        except Exception:
+            abort(401, description="Identidad de token inválida.")
 
-    # Si no es admin ni client, ¿qué es? ¿Un token de dispositivo?
-    # TODO: Implementar lógica si los dispositivos se autentican diferente para POST.
-    elif required_level == "write":
-         print(f"TODO: Implementar autenticación/autorización para ESCRITURA de telemetría por device {device_id}")
-         # Por ahora, denegamos si no es admin
-         abort(403, description="Permiso de escritura de telemetría no definido para este token.")
-    else:
-        # Otros roles/tokens no pueden leer
-        abort(403, description="Acceso denegado.")
+        patient = _patients_service.get_by_user_id(user_id)
+        if not patient:
+            abort(404, description="Perfil no encontrado.")
+
+        device = _devices_service.get_patient_device(patient.id, device_id)
+        if not device:
+            abort(403, description="Acceso denegado a la telemetría de este dispositivo.")
+        return
+
+    if required_level == "write":
+        abort(403, description="Permiso de escritura de telemetría no definido para este token.")
+    abort(403, description="Acceso denegado.")
 
 
 # --- Rutas ---

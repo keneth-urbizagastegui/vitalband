@@ -58,7 +58,7 @@ def login():
         token = create_access_token(identity=user_id_str, additional_claims=additional) # Usamos el string
         # --- FIN MODIFICACIÓN ---
 
-        logger.error(f"PASO 1 (BACKEND): Token creado y enviado: {token}") # Mantenemos error level por visibilidad
+        logger.info("Token creado y enviado")
         logger.info(f"Login exitoso para usuario {user_id_int} ({email})")
 
         user_info = {

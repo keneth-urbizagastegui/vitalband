@@ -9,7 +9,7 @@ import {
   getPatientThresholdsAdmin,
   setPatientThresholdAdmin // <-- Importamos esta
 } from "../api/endpoints";
-import type { PatientDetail, Alert, Threshold, PatientUpdateData, ThresholdUpdateData } from "../api/endpoints";
+import type { PatientDetail, Alert, PatientUpdateData, ThresholdUpdateData } from "../api/endpoints";
 
 // --- Helpers de Formato (puedes moverlos a utils.ts) ---
 

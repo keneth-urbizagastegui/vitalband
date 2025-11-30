@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 // Importa las nuevas funciones de API
 import { getMyLatestReadings, getMyReadingsHistory } from "../api/endpoints";
 // Mantén los tipos (asegúrate que estén actualizados en endpoints.ts)
-import type { Reading, User } from "../api/endpoints";
+import type { Reading } from "../api/endpoints";
 // Importa componentes UI y de Layout
 // Asumiendo que AppLayout ya incluye Sidebar y Topbar
 // import AppLayout from "../components/layout/AppLayout";
